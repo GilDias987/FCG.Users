@@ -9,8 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FCG.Users.Application.Dto\FCG.Users.Application.Dto.csproj" />
+    <ProjectReference Include="..\FCG.Users.Application.Interface\FCG.Users.Application.Interface.csproj" />
+    <ProjectReference Include="..\FCG.Users.Application.UseCases\FCG.Users.Application.UseCases.csproj" />
+    <ProjectReference Include="..\FCG.Users.Infrastructure\FCG.Users.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
