@@ -8,6 +8,11 @@ namespace FCG.Users.Domain.Entities
 {
     public class User : BaseEntity
     {
+        public User()
+        {
+           
+        }
+
         public User(string nome, string email, string passoword, int userGroupId)
         {
             Inicializar(nome, email, passoword, userGroupId);
