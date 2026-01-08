@@ -3,10 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUser
+namespace FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUserGroup
 {
-
-    public class DeleteUserCommand : IRequest<bool>
+    public class DeleteUserGroupCommand : IRequest<bool>
     {
         public int Id { get; set; }
     }

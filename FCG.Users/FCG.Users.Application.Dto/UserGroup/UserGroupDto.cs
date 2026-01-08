@@ -4,7 +4,9 @@ using System.Text;
 
 namespace FCG.Users.Application.Dto.UserGroup
 {
-    internal class UserGroupDto
+    public class UserGroupDto
     {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }
