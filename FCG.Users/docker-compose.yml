@@ -1,0 +1,54 @@
+services:
+  users-api:
+    build:
+      context: .
+      dockerfile: FCG.Users.WebAPI/Dockerfile
+    container_name: users-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings=Server=sqlserver;Database=FCGUsers;User Id=sa;Password=Your_password123;TrustServerCertificate=True
+      - Jwt__Issuer=fcg-users
+      - Jwt__Key=super_secret_dev_key_change_me
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - rabbitmq
+    networks:
+      - fcg-net
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server
+    container_name: fcg-users-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=pass@123
+    ports:
+      - "1433:1433"
+    networks:
+      - fcg-net
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: fcg-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - fcg-net
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+  
+volumes:
+  sqlserver-data:
+  rabbitmq-data:
+
+networks:
+  fcg-net:
+    driver: bridge
