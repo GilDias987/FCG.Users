@@ -1,5 +1,10 @@
 <Solution>
   <Folder Name="/document/" />
+  <Folder Name="/k8s/">
+    <File Path="k8s/configmap.yaml" />
+    <File Path="k8s/deployment.yaml" />
+    <File Path="k8s/secret.yaml" />
+  </Folder>
   <Folder Name="/src/" />
   <Folder Name="/src/Application/">
     <Project Path="FCG.Users.Application.Dto/FCG.Users.Application.Dto.csproj" />
