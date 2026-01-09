@@ -1,8 +1,8 @@
-﻿using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserGroup;
-using FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUserGroup;
-using FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup;
-using FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUserGroup;
+﻿using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.DeleteUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup;
 using FCG.Users.Application.UseCases.Feature.User.Queries.GetUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGroup;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

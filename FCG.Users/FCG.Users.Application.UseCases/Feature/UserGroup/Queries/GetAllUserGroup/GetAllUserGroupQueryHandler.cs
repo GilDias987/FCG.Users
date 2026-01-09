@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup
 {
 
     public class GetAllUserGroupQueryHandler : IRequestHandler<GetAllUserGroupQuery, List<UserGroupDto>>

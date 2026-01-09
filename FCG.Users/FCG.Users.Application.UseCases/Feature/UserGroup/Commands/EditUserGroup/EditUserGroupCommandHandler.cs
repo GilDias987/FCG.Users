@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGroup
 {
     public class EditUserGroupCommandHandler : IRequestHandler<EditUserGroupCommand, UserGroupDto>
     {

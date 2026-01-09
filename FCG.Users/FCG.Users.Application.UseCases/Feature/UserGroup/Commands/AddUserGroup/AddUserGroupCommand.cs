@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup
 {
-    public class EditUserGroupCommand : IRequest<UserGroupDto>
+    public class AddUserGroupCommand : IRequest<UserGroupDto>
     {
-        public int Id { get; set; }
         public required string Name { get; set; }
     }
 }
