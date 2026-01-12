@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGroup
 {
     public sealed class EditUserGroupValidator : AbstractValidator<EditUserGroupCommand>
     {
