@@ -24,7 +24,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddOpenApiDocument(options =>
 {
-    options.Title = "Api - Fiap Cloud Game";
+    options.Title = "Api Users - Fiap Cloud Game";
     options.Version = "1.0";
     options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
     {
@@ -42,6 +42,7 @@ builder.Services.AddOpenApiDocument(options =>
 builder.Services.AddDbContext<ApplicationDbContext>(options => {
     options.UseSqlServer(configuration.GetConnectionString("ConnectionStrings"));
 }, ServiceLifetime.Scoped);
+
 
 #region [JWT]
 

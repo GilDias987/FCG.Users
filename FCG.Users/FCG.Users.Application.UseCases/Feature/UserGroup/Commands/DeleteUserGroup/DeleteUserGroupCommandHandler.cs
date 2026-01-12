@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.DeleteUserGroup
 {
     public class DeleteUserGroupCommandHandler : IRequestHandler<DeleteUserGroupCommand, bool>
     {

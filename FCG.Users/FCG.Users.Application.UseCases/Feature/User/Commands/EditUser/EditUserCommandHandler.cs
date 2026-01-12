@@ -23,7 +23,7 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUser
             try
             {
                 var objUser = await _userRepository.GetByIdAsync(request.Id);
-                objUser.Inicializar(request.Name, request.Email, request.Password, request.UserGroupId);
+                objUser.Initialize(request.Name, request.Email, request.Password, request.UserGroupId);
                 await _userRepository.UpdateAsync(objUser);
 
                 return new UserDto() { Id = objUser.Id, Name = objUser.Name, Email = objUser.Email, UserGroupId = objUser.UserGroupId };

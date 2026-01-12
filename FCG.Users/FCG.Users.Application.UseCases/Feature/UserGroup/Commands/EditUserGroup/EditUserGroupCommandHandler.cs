@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGroup
 {
     public class EditUserGroupCommandHandler : IRequestHandler<EditUserGroupCommand, UserGroupDto>
     {
@@ -19,7 +19,7 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.EditUserGroup
         public async Task<UserGroupDto> Handle(EditUserGroupCommand request, CancellationToken cancellationToken)
         {
             var group = await _userGroupRepository.GetByIdAsync(request.Id);
-            group.Inicializar(request.Name);
+            group.Initialize(request.Name);
             await _userGroupRepository.UpdateAsync(group);
             return new UserGroupDto() { Id = group.Id, Name = group.Name };
         }

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup
 {
     public sealed class AddUserGroupValidator : AbstractValidator<AddUserGroupCommand>
     {
