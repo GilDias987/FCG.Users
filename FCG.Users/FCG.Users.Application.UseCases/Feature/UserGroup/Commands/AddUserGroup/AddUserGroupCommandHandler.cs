@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup
 {
     public class AddUserGroupCommandHandler : IRequestHandler<AddUserGroupCommand, UserGroupDto>
     {
@@ -22,7 +22,7 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUserGroup
 
             try
             {
-                var objUserGroup = await _userGroupRepository.AddAsync(new UserGroup(request.Name));
+                var objUserGroup = await _userGroupRepository.AddAsync(new Domain.Entities.UserGroup(request.Name));
 
                 return new UserGroupDto() { Id = objUserGroup.Id, Name = objUserGroup.Name };
             }

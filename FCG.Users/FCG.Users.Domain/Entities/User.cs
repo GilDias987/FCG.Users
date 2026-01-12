@@ -15,7 +15,7 @@ namespace FCG.Users.Domain.Entities
 
         public User(string nome, string email, string passoword, int userGroupId)
         {
-            Inicializar(nome, email, passoword, userGroupId);
+            Initialize(nome, email, passoword, userGroupId);
         }
 
         #region Propriedades Base
@@ -29,7 +29,7 @@ namespace FCG.Users.Domain.Entities
         public UserGroup UserGroup { get; set; }
         #endregion
 
-        public void Inicializar(string name, string email, string passoword, int userGroupId)
+        public void Initialize(string name, string email, string passoword, int userGroupId)
         {
             Guard.Against<DomainException>(string.IsNullOrWhiteSpace(name), "O nome do usuário não pode ser vazio.");
             Guard.AgainstEmptyId(userGroupId, "Grupo Usuario Id");

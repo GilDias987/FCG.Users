@@ -14,7 +14,7 @@ namespace FCG.Users.Domain.Entities
         }
         public UserGroup(string name)
         {
-            Inicializar(name);
+            Initialize(name);
         }
 
         #region Propriedades Base
@@ -25,7 +25,7 @@ namespace FCG.Users.Domain.Entities
         public ICollection<User>? Users { get; set; }
         #endregion
 
-        public void Inicializar(string name)
+        public void Initialize(string name)
         {
             Guard.Against<DomainException>(string.IsNullOrWhiteSpace(name), "O nome do grupo não pode ser vazio.");
             Name = name.Trim();

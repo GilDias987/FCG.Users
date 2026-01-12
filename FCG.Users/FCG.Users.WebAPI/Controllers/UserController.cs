@@ -1,5 +1,5 @@
 ﻿using FCG.Users.Application.UseCases.Feature.User.Commands.AddUser;
-using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup;
 using FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUser;
 using FCG.Users.Application.UseCases.Feature.User.Commands.EditUser;
 using FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUser;

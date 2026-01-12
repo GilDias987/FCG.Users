@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUserGroup
+namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup
 {
     public class GetAllUserGroupQuery : IRequest<List<UserGroupDto>>
     {
