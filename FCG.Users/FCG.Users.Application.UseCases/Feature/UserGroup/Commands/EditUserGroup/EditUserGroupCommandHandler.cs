@@ -19,7 +19,7 @@ namespace FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGrou
         public async Task<UserGroupDto> Handle(EditUserGroupCommand request, CancellationToken cancellationToken)
         {
             var group = await _userGroupRepository.GetByIdAsync(request.Id);
-            group.Inicializar(request.Name);
+            group.Initialize(request.Name);
             await _userGroupRepository.UpdateAsync(group);
             return new UserGroupDto() { Id = group.Id, Name = group.Name };
         }
