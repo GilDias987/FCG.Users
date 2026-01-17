@@ -64,7 +64,7 @@ namespace FCG.Users.Domain.Entities
 
         private static void ValidEmailDomain(string value)
         {
-            Guard.Against<DomainException>(!Regex.IsMatch(value, @"@(fiap\.com\.br|alura\.com\.br|pm3\.com\.br)$"),
+            Guard.Against<DomainException>(!Regex.IsMatch(value, @"@(gmail\.com|fiap\.com\.br|alura\.com\.br|pm3\.com\.br)$"),
                                                                     "E-mail deve pertencer aos domínios @fiap.com.br, @alura.com.br ou @pm3.com.br.");
         }
         private static void ValidEmail(string value)
