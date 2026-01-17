@@ -55,7 +55,7 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUser
                 .WithMessage("Este e-mail já está registrado. Por favor, tente outro.")
                 .Must((model, context) =>
                 {
-                    if (!Regex.IsMatch(model.Email, @"@(fiap\.com\.br|alura\.com\.br|pm3\.com\.br)$"))
+                    if (!Regex.IsMatch(model.Email, @"@(gmail\.com|fiap\.com\.br|alura\.com\.br|pm3\.com\.br)$"))
                     {
                         return false;
                     }
