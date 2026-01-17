@@ -1,4 +1,5 @@
-﻿using FCG.Users.Application.UseCases.Behaviour;
+﻿using FCG.Users.Application.Dto.User;
+using FCG.Users.Application.UseCases.Behaviour;
 using FCG.Users.Application.UseCases.Feature.User.Commands.AddUser;
 using FluentValidation;
 using MassTransit;
@@ -19,27 +20,16 @@ namespace FCG.Users.Application.UseCases.Registration
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-
+           
             services.AddMassTransit(x =>
             {
-                x.SetKebabCaseEndpointNameFormatter();
-                x.AddConsumer<TesteConsumer>();
-
                 x.UsingRabbitMq((context, cfg) =>
                 {
-                    cfg.Host(new Uri("amqp://localhost"), h =>
+                    cfg.Host(configuration["Rabbitmq:Url"], "/", h =>
                     {
-                        h.Username("admin");
-                        h.Password("admin123");
+                        h.Username(configuration["Rabbitmq:Username"]);
+                        h.Password(configuration["Rabbitmq:Password"]);
                     });
-
-                    cfg.ReceiveEndpoint("order-created-queue", e => // Nome da fila
-                    {
-                        e.ConfigureConsumer<TesteConsumer>(context);
-                    });
-
-                    // Configura automaticamente as filas com base nos consumidores registrados
-                    cfg.ConfigureEndpoints(context);
                 });
             });
 

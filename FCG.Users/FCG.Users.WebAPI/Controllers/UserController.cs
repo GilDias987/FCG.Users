@@ -73,7 +73,7 @@ namespace FCG.Users.WebAPI.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("Get{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _mediator.Send(new GetUserQuery { Id = id });

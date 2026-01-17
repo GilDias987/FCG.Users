@@ -22,4 +22,10 @@
     <ProjectReference Include="..\FCG.Users.Application.Interface\FCG.Users.Application.Interface.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FCG.Shared.Contracts">
+      <HintPath>_dll\FCG.Shared.Contracts.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
