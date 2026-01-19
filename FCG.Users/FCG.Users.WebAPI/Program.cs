@@ -3,7 +3,6 @@ using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserSeed;
 using FCG.Users.Application.UseCases.Registration;
 using FCG.Users.Infrastructure.Context;
 using FCG.Users.Infrastructure.Repository;
-using FCG.Users.WebAPI.Initialize;
 using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
