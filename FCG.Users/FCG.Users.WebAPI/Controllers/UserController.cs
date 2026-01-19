@@ -15,7 +15,7 @@ namespace FCG.Users.WebAPI.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize(Policy = "ADMINISTRADOR")]
+    [Authorize(Policy = "ADMINISTRADOR")]
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
