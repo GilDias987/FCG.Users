@@ -1,0 +1,27 @@
+Relatório de Entrega da Fase 2:
+
+    ◦ Nome do grupo. 
+        Grupo 33
+          
+    ◦ Participantes e usernames no Discord. 
+		RM367747 – Alexandre Araújo da Silva  / AlexandreAraujo
+		RM367560 – Josegil Dias Frota Figueira / gildiasfrota
+		RM367985 - Miguel de Oliveira Gonçalves / miguel084
+
+    ◦ Link da documentação.
+        https://github.com/GilDias987/FCG.Users/blob/release/FCG%20-%20Documenta%C3%A7%C3%A3o.txt
+
+    ◦ Link do(s) repositório(s).
+		◦ UsersAPI
+		https://github.com/GilDias987/FCG.Users
+		◦ CatalogAPI
+		https://github.com/GilDias987/FCG.Catalog
+		◦ PaymentsAPI
+		https://github.com/GilDias987/FCG.Payments
+		◦ NotificationsAPI
+		https://github.com/GilDias987/FCG.Notification
+		◦ Orquestrator
+		https://github.com/GilDias987/FCG.Orquestrator
+
+    ◦ Link do vídeo salvo no Youtube ou lugar de sua preferência.
+	    https://www.youtube.com/watch?v=lRdPMT16KmM
