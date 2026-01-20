@@ -21,12 +21,32 @@ Este serviço é um consumidor puramente reativo.
 * **Documentação:** Swagger
 * **Orquestração:** Docker & Kubernetes
 
-## 4. Variáveis de Ambiente
-| Variável | Descrição | Exemplo |
-| :--- | :--- | :--- |
-| `RabbitMQ__Host` | Host do Broker de Mensageria | `rabbitmq://rabbitmq-service` |
-| `Smtp__Provider` | Provedor de e-mail simulado | `ConsoleLogger` |
-| `App__WelcomeTemplate` | Template da mensagem de boas-vindas | `Bem-vindo à FCG!` |
+## 4. Configuração do Ambiente
+Para que a aplicação funcione corretamente, edite o arquivo `appsettings.Development.json` seguindo o modelo abaixo:
+
+```json
+{
+  "ConnectionStrings": {
+    "ConnectionStrings": "Server=users-sqlserver;Initial Catalog=db_fcg_users;Persist Security Info=False;User ID=sa;Password=pass@123;Encrypt=False;Pooling=True;TrustServerCertificate=True"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "Jwt": {
+    "Key": "ChaveSuperSecretaComMaisDe32CaracteresAqui12345",
+    "Issuer": "FCG-Users"
+  },
+  "Rabbitmq": {
+    "Url": "localhost",
+    "Username": "admin",
+    "Password": "admin123"
+  },
+  "AllowedHosts": "*" 
+}
+```
 
 ## 👥 Integrantes
 - **Nome do Grupo:**: 33.
