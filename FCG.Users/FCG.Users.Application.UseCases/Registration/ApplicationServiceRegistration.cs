@@ -23,13 +23,9 @@ namespace FCG.Users.Application.UseCases.Registration
            
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((context, cfg) =>
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
-                    cfg.Host(configuration["Rabbitmq:Url"], "/", h =>
-                    {
-                        h.Username(configuration["Rabbitmq:Username"]);
-                        h.Password(configuration["Rabbitmq:Password"]);
-                    });
+                    cfg.Host(configuration["ServiceBus:ConnectionString"]);
                 });
             });
 
