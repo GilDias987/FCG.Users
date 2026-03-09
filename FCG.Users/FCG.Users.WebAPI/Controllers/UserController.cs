@@ -1,5 +1,4 @@
 ﻿using FCG.Users.Application.UseCases.Feature.User.Commands.AddUser;
-using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup;
 using FCG.Users.Application.UseCases.Feature.User.Commands.DeleteUser;
 using FCG.Users.Application.UseCases.Feature.User.Commands.EditUser;
 using FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUser;
@@ -19,10 +18,12 @@ namespace FCG.Users.WebAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(IMediator mediator)
+        public UserController(IMediator mediator, ILogger<UserController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -33,7 +34,11 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpPost("Insert")]
         public async Task<IActionResult> InsertUser(AddUserCommand addUserCommand)
         {
+            _logger.LogInformation("Iniciando inclusão de novo usuário: {@UserCommand}", addUserCommand);
+
             var user = await _mediator.Send(addUserCommand);
+
+            _logger.LogInformation("Usuário {UserId} incluído com sucesso.", user.Id);
 
             return Created($"/api/user/{user.Id}", user);
         }
@@ -46,6 +51,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateUser([FromBody] EditUserCommand editUserCommand)
         {
+            _logger.LogInformation("Solicitação de alteração para o usuário ID: {UserId}", editUserCommand.Id);
+
             var usuario = await _mediator.Send(editUserCommand);
 
             return Ok(usuario);
@@ -59,11 +66,17 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpDelete("Delete{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            _logger.LogWarning("Tentativa de exclusão do usuário ID: {UserId}", id);
+
             var isDeleted = await _mediator.Send(new DeleteUserCommand { Id = id });
             if (isDeleted)
             {
+                _logger.LogInformation("Usuário {UserId} deletado com sucesso.", id);
+
                 return Ok("Usuário deletado com sucesso");
             }
+
+            _logger.LogWarning("Falha ao deletar: Usuário {UserId} não encontrado.", id);
 
             return NotFound();
         }
@@ -76,6 +89,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
+            _logger.LogDebug("Buscando detalhes do usuário ID: {UserId}", id);
+
             var user = await _mediator.Send(new GetUserQuery { Id = id });
 
             return Ok(user);
@@ -88,6 +103,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllUsuario()
         {
+            _logger.LogInformation("Listando todos os usuários.");
+
             var usuario = await _mediator.Send(new GetAllUserQuery());
 
             return Ok(usuario);

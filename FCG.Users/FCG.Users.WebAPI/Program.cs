@@ -7,15 +7,18 @@ using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FCG.Users.WebAPI.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
+
+// Configura o Serilog para ler o appsettings.json
+builder.AddSerilogLogging();
 
 // Add services to the container.
 
@@ -86,7 +89,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseOpenApi();
