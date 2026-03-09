@@ -1,8 +1,8 @@
-﻿using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.DeleteUserGroup;
-using FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup;
-using FCG.Users.Application.UseCases.Feature.User.Queries.GetUserGroup;
+﻿using FCG.Users.Application.UseCases.Feature.User.Queries.GetUserGroup;
 using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.AddUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.DeleteUserGroup;
 using FCG.Users.Application.UseCases.Feature.UserGroup.Commands.EditUserGroup;
+using FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,9 +15,12 @@ namespace FCG.Users.WebAPI.Controllers
     public class UserGroupController : ControllerBase
     {
         private readonly IMediator _mediator;
-        public UserGroupController(IMediator mediator)
+        private readonly ILogger<UserGroupController> _logger;
+
+        public UserGroupController(IMediator mediator, ILogger<UserGroupController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -28,7 +31,12 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpPost("Insert")]
         public async Task<IActionResult> InsertGroupUser([FromBody] AddUserGroupCommand addUserGroupCommand)
         {
+            _logger.LogInformation("Iniciando criação de grupo de usuário: {GroupName}", addUserGroupCommand.Name);
+
             var userGroup = await _mediator.Send(addUserGroupCommand);
+
+            _logger.LogInformation("Grupo criado com sucesso. ID: {GroupId}", userGroup.Id);
+
             return CreatedAtAction("InsertGroupUser", userGroup);
         }
 
@@ -40,6 +48,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpPut("Update")]
         public async Task<IActionResult> UpdateGroupUser([FromBody] EditUserGroupCommand editUserGroupCommand)
         {
+            _logger.LogInformation("Atualizando grupo ID: {GroupId}", editUserGroupCommand.Id);
+
             var userGroup = await _mediator.Send(editUserGroupCommand);
             return Ok(userGroup);
         }
@@ -52,12 +62,17 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpDelete("Delete{id}")]
         public async Task<ActionResult> DeletarUserGroup(int id)
         {
-            var isDeleted = await _mediator.Send(new DeleteUserGroupCommand { Id = id });
+            _logger.LogWarning("Tentativa de exclusão do grupo ID: {GroupId}", id);
 
+            var isDeleted = await _mediator.Send(new DeleteUserGroupCommand { Id = id });
             if (isDeleted)
             {
+                _logger.LogInformation("Grupo {GroupId} deletado com sucesso.", id);
+
                 return Ok("Grupo de Usuario foi deletado com sucesso.");
             }
+
+            _logger.LogWarning("Falha ao deletar: Grupo {GroupId} não encontrado.", id);
 
             return NotFound();
         }
@@ -70,6 +85,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpGet("Get{id}")]
         public async Task<IActionResult> GetGrupoUsuario(int id)
         {
+            _logger.LogDebug("Buscando grupo ID: {GroupId}", id);
+
             var userGroup = await _mediator.Send(new GetUserGroupQuery { Id = id });
 
             return Ok(userGroup);
@@ -82,6 +99,8 @@ namespace FCG.Users.WebAPI.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAllGrupoUsuario()
         {
+            _logger.LogInformation("Listando todos os grupos de usuários.");
+
             var userGroup = await _mediator.Send(new GetAllUserGroupQuery());
 
             return Ok(userGroup);
