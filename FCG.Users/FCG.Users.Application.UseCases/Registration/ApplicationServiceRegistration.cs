@@ -1,15 +1,10 @@
-﻿using FCG.Users.Application.Dto.User;
-using FCG.Users.Application.UseCases.Behaviour;
-using FCG.Users.Application.UseCases.Feature.User.Commands.AddUser;
+﻿using FCG.Users.Application.UseCases.Behaviour;
 using FluentValidation;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace FCG.Users.Application.UseCases.Registration
 {
