@@ -24,16 +24,16 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release FCG.Users/FCG.Users.slnx
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish FCG.Users/FCG.Users.WebAPI/FCG.Users.WebAPI.csproj -c Release -o "${{env.DOTNET_ROOT}}/FCG.Users"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{env.DOTNET_ROOT}}/FCG.Users
 
   deploy:
     runs-on: windows-latest
@@ -52,4 +52,5 @@ jobs:
           app-name: 'api-users'
           slot-name: 'Production'
           package: .
+
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F6A78D45E51E4D8EA6D45005D83983E1 }}
