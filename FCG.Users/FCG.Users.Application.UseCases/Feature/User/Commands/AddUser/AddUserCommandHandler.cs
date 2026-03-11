@@ -12,13 +12,13 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUser
     {
         private readonly IUserGroupRepository _userGroupRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IBus _bus;
+        private readonly ISendEndpointProvider _sendEndpointProvider;
 
-        public AddUserCommandHandler(IUserRepository userRepository, IUserGroupRepository userGroupRepository, IBus bus, ISendEndpointProvider send)
+        public AddUserCommandHandler(IUserRepository userRepository, IUserGroupRepository userGroupRepository, ISendEndpointProvider sendEndpointProvider, ISendEndpointProvider send)
         {
             _userGroupRepository = userGroupRepository;
             _userRepository = userRepository;
-            _bus = bus;
+            _sendEndpointProvider = sendEndpointProvider;
         }
 
         public async Task<UserDto> Handle(AddUserCommand request, CancellationToken cancellationToken)
@@ -37,7 +37,11 @@ namespace FCG.Users.Application.UseCases.Feature.User.Commands.AddUser
                     Group = objUserGroup.Name
                 };
 
-                await _bus.Publish(new UserCreatedEvent { Email = user.Email, Name = user.Name });
+                var endpoint = await _sendEndpointProvider
+                    .GetSendEndpoint(new Uri("queue:user-create-queue"));
+
+                await endpoint.Send(new UserCreatedEvent { Email = user.Email, Name = user.Name });
+
                 return user;
          
             }

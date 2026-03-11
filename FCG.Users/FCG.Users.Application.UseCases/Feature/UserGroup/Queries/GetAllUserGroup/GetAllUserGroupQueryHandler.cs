@@ -36,5 +36,6 @@ namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGro
 
             return lstUserGroup.ToList();
         }
+
     }
 }

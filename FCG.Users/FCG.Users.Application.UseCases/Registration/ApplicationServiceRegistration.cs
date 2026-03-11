@@ -1,15 +1,10 @@
-﻿using FCG.Users.Application.Dto.User;
-using FCG.Users.Application.UseCases.Behaviour;
-using FCG.Users.Application.UseCases.Feature.User.Commands.AddUser;
+﻿using FCG.Users.Application.UseCases.Behaviour;
 using FluentValidation;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace FCG.Users.Application.UseCases.Registration
 {
@@ -23,13 +18,9 @@ namespace FCG.Users.Application.UseCases.Registration
            
             services.AddMassTransit(x =>
             {
-                x.UsingRabbitMq((context, cfg) =>
+                x.UsingAzureServiceBus((context, cfg) =>
                 {
-                    cfg.Host(configuration["Rabbitmq:Url"], "/", h =>
-                    {
-                        h.Username(configuration["Rabbitmq:Username"]);
-                        h.Password(configuration["Rabbitmq:Password"]);
-                    });
+                    cfg.Host(configuration["ServiceBus:ConnectionString"]);
                 });
             });
 

@@ -1,20 +1,24 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-using FCG.Users.WebAPI.Middleware;
 using FCG.Users.Application.Interface.Repository;
+using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserSeed;
+using FCG.Users.Application.UseCases.Registration;
 using FCG.Users.Infrastructure.Context;
 using FCG.Users.Infrastructure.Repository;
+using FCG.Users.WebAPI.Middleware;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using FCG.Users.Application.UseCases.Registration;
+using FCG.Users.WebAPI.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
+
+// Configura o Serilog para ler o appsettings.json
+builder.AddSerilogLogging();
 
 // Add services to the container.
 
@@ -85,7 +89,9 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
 // Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseOpenApi();
@@ -101,5 +107,14 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.UseExceptionHandler();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
+    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+    await mediator.Send(new AddUserSeedCommand());
+}
 
 app.Run();
