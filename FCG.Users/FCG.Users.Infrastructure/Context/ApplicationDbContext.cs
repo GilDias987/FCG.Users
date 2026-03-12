@@ -23,4 +23,3 @@ namespace FCG.Users.Infrastructure.Context
         }
     }
 }
-``
