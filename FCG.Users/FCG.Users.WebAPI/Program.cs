@@ -22,6 +22,19 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
 
+Console.WriteLine("==== CONFIG DEBUG START ====");
+
+var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
+Console.WriteLine($"SQL ConnectionString NULL? {string.IsNullOrEmpty(sqlConn)}");
+
+var serviceBusConn = builder.Configuration["AzureServiceBus:ConnectionString"];
+Console.WriteLine($"ServiceBus ConnectionString NULL? {string.IsNullOrEmpty(serviceBusConn)}");
+
+Console.WriteLine("SQL ConnectionString Length: " + (sqlConn?.Length ?? 0));
+Console.WriteLine("ServiceBus ConnectionString Length: " + (serviceBusConn?.Length ?? 0));
+
+Console.WriteLine("==== CONFIG DEBUG END ====");
+
 builder.Services.AddOpenApiDocument(options =>
 {
     options.Title = "Api Users - Fiap Cloud Game";
@@ -107,11 +120,11 @@ app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {
-    //var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    //db.Database.Migrate();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 
-    //var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-    //await mediator.Send(new AddUserSeedCommand());
+    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+    await mediator.Send(new AddUserSeedCommand());
 }
 
 app.Run();
