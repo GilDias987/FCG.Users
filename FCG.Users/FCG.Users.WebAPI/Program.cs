@@ -66,7 +66,7 @@ builder.Services.AddOpenApiDocument(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ConnectionStrings"));
+    options.UseSqlServer(sqlConn);
 });
 
 
@@ -131,19 +131,23 @@ app.MapControllers();
 app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    Console.WriteLine("START MIGRATION");
-    db.Database.Migrate();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-    Console.WriteLine("MIGRATION OK");
-
-    Console.WriteLine("START SEED");
-
-    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-    await mediator.Send(new AddUserSeedCommand());
-
-    Console.WriteLine("SEED OK");
+        Console.WriteLine("EF ConnString (real): [" + db.Database.GetDbConnection().ConnectionString + "]");
+        Console.WriteLine("START MIGRATION");
+        db.Database.Migrate();
+        Console.WriteLine("MIGRATION OK");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("MIGRATION FAILED:");
+        Console.WriteLine(ex.ToString());
+        throw;
+    }
 }
 
 app.Run();
