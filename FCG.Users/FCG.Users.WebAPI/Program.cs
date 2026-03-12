@@ -31,6 +31,7 @@ var sql = builder.Configuration.GetConnectionString("ConnectionStrings");
 Console.WriteLine("SQL RAW:");
 Console.WriteLine($"[{sql}]");
 Console.WriteLine($"Length: {sql?.Length}");
+Console.WriteLine("FIRST CHAR: " + (int)sqlConn[0]);
 
 var serviceBusConn = builder.Configuration["AzureServiceBus:ConnectionString"];
 Console.WriteLine($"ServiceBus ConnectionString NULL? {string.IsNullOrEmpty(serviceBusConn)}");
