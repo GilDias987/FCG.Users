@@ -126,10 +126,17 @@ app.UseExceptionHandler();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    Console.WriteLine("START MIGRATION");
     db.Database.Migrate();
+
+    Console.WriteLine("MIGRATION OK");
+
+    Console.WriteLine("START SEED");
 
     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
     await mediator.Send(new AddUserSeedCommand());
+
+    Console.WriteLine("SEED OK");
 }
 
 app.Run();
