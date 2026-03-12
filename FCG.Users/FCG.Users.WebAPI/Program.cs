@@ -27,6 +27,11 @@ Console.WriteLine("==== CONFIG DEBUG START ====");
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 Console.WriteLine($"SQL ConnectionString NULL? {string.IsNullOrEmpty(sqlConn)}");
 
+var sql = builder.Configuration.GetConnectionString("ConnectionStrings");
+Console.WriteLine("SQL RAW:");
+Console.WriteLine($"[{sql}]");
+Console.WriteLine($"Length: {sql?.Length}");
+
 var serviceBusConn = builder.Configuration["AzureServiceBus:ConnectionString"];
 Console.WriteLine($"ServiceBus ConnectionString NULL? {string.IsNullOrEmpty(serviceBusConn)}");
 
