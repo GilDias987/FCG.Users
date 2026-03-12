@@ -13,10 +13,6 @@ using FCG.Users.WebAPI.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
-
 // Configura o Serilog para ler o appsettings.json
 builder.AddSerilogLogging();
 
@@ -42,11 +38,11 @@ builder.Services.AddOpenApiDocument(options =>
     options.OperationProcessors.Add(
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
-
+var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddDbContext<ApplicationDbContext>(options => {
-    options.UseSqlServer(configuration.GetConnectionString("ConnectionStrings"));
-}, ServiceLifetime.Scoped);
-
+{
+    options.UseSqlServer(sqlConn);
+});
 
 #region [JWT]
 
