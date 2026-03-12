@@ -32,7 +32,7 @@ Console.WriteLine("SQL RAW:");
 Console.WriteLine($"[{sql}]");
 Console.WriteLine($"Length: {sql?.Length}");
 Console.WriteLine("FIRST CHAR: " + (int)sqlConn[0]);
-Console.WriteLine("LAST CHAR: " + (int)sqlConn[-1]);
+Console.WriteLine("LAST CHAR: " + (int)sqlConn[^1]);
 
 foreach (var c in sqlConn.Take(5))
 {
