@@ -38,6 +38,7 @@ builder.Services.AddOpenApiDocument(options =>
     options.OperationProcessors.Add(
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
+
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddDbContext<ApplicationDbContext>(options => 
 {
@@ -88,11 +89,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+app.UseOpenApi();
+app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 
