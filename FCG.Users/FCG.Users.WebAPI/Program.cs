@@ -22,31 +22,6 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 //builder.Services.AddOpenApi();
 
-Console.WriteLine("==== CONFIG DEBUG START ====");
-
-var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
-Console.WriteLine($"SQL ConnectionString NULL? {string.IsNullOrEmpty(sqlConn)}");
-
-var sql = builder.Configuration.GetConnectionString("ConnectionStrings");
-Console.WriteLine("SQL RAW:");
-Console.WriteLine($"[{sql}]");
-Console.WriteLine($"Length: {sql?.Length}");
-Console.WriteLine("FIRST CHAR: " + (int)sqlConn[0]);
-Console.WriteLine("LAST CHAR: " + (int)sqlConn[^1]);
-
-foreach (var c in sqlConn.Take(5))
-{
-    Console.WriteLine((int)c);
-}
-
-var serviceBusConn = builder.Configuration["AzureServiceBus:ConnectionString"];
-Console.WriteLine($"ServiceBus ConnectionString NULL? {string.IsNullOrEmpty(serviceBusConn)}");
-
-Console.WriteLine("SQL ConnectionString Length: " + (sqlConn?.Length ?? 0));
-Console.WriteLine("ServiceBus ConnectionString Length: " + (serviceBusConn?.Length ?? 0));
-
-Console.WriteLine("==== CONFIG DEBUG END ====");
-
 builder.Services.AddOpenApiDocument(options =>
 {
     options.Title = "Api Users - Fiap Cloud Game";
@@ -63,12 +38,11 @@ builder.Services.AddOpenApiDocument(options =>
     options.OperationProcessors.Add(
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
+builder.Services.AddDbContext<ApplicationDbContext>(options => {
 {
     options.UseSqlServer(sqlConn);
 });
-
 
 #region [JWT]
 
@@ -132,21 +106,11 @@ app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {
-    try
-    {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 
-        Console.WriteLine("EF ConnString (real): [" + db.Database.GetDbConnection().ConnectionString + "]");
-        Console.WriteLine("START MIGRATION");
-        db.Database.Migrate();
-        Console.WriteLine("MIGRATION OK");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine("MIGRATION FAILED:");
-        Console.WriteLine(ex.ToString());
-        throw;
-    }
+    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+    await mediator.Send(new AddUserSeedCommand());
 }
 
 app.Run();
