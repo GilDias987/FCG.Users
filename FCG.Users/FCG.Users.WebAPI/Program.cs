@@ -107,11 +107,11 @@ app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();
+    //var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    //db.Database.Migrate();
 
-    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-    await mediator.Send(new AddUserSeedCommand());
+    //var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+    //await mediator.Send(new AddUserSeedCommand());
 }
 
 app.Run();
