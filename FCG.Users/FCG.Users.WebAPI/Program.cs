@@ -13,10 +13,6 @@ using FCG.Users.WebAPI.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json")
-    .Build();
-
 // Configura o Serilog para ler o appsettings.json
 builder.AddSerilogLogging();
 
@@ -43,10 +39,11 @@ builder.Services.AddOpenApiDocument(options =>
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => {
-    options.UseSqlServer(configuration.GetConnectionString("ConnectionStrings"));
-}, ServiceLifetime.Scoped);
-
+var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
+builder.Services.AddDbContext<ApplicationDbContext>(options => 
+{
+    options.UseSqlServer(sqlConn);
+});
 
 #region [JWT]
 
@@ -92,11 +89,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseOpenApi();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+app.UseOpenApi();
+app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 
