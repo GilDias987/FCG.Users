@@ -7,7 +7,7 @@ using System.Text;
 namespace FCG.Users.Application.UseCases.Service
 {
     public class EmailService : IEmailService
-    {
+    { 
         public EmailMessageDto EmailMessage(string email, string name)
         {
             var subject = "FCG - Bem-vindo(a)!";
