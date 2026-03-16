@@ -1,4 +1,7 @@
-﻿using FCG.Users.Application.UseCases.Behaviour;
+﻿using FCG.Users.Application.Interface.Repository;
+using FCG.Users.Application.Interface.Service;
+using FCG.Users.Application.UseCases.Behaviour;
+using FCG.Users.Application.UseCases.Service;
 using FluentValidation;
 using MassTransit;
 using MediatR;
@@ -15,7 +18,7 @@ namespace FCG.Users.Application.UseCases.Registration
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-           
+            services.AddScoped<IEmailService, EmailService>();
             services.AddMassTransit(x =>
             {
                 x.UsingAzureServiceBus((context, cfg) =>
