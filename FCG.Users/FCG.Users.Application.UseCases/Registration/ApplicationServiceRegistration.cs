@@ -19,6 +19,8 @@ namespace FCG.Users.Application.UseCases.Registration
             services.AddMediatR(Assembly.GetExecutingAssembly());
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddScoped<IEmailService, EmailService>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<IUserService, UserService>();
             services.AddMassTransit(x =>
             {
                 x.UsingAzureServiceBus((context, cfg) =>

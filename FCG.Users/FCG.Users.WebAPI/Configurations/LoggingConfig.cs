@@ -1,19 +1,27 @@
-﻿using Serilog;
-
-namespace FCG.Users.WebAPI.Configurations
+﻿namespace FCG.Users.WebAPI.Configurations
 {
     public static class LoggingConfig
     {
-        public static void AddSerilogLogging(this WebApplicationBuilder builder)
+        public static void AddLogging(this WebApplicationBuilder builder)
         {
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(builder.Configuration)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.Debug()
-                .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
-            builder.Host.UseSerilog();
+            // 1. Adiciona o SDK do Application Insights (Telemetria de requisições, etc.)
+            builder.Services.AddApplicationInsightsTelemetry();
+
+            // 2. Configura especificamente o Logging para o Application Insights
+            builder.Logging.AddApplicationInsights(
+                configureTelemetryConfiguration: (config) =>
+                    config.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"],
+                configureApplicationInsightsLoggerOptions: (options) => 
+                {
+                    options.IncludeScopes = true;
+                    options.TrackExceptionsAsExceptionTelemetry = false;
+                }
+            );
+
+            builder.Logging.SetMinimumLevel(LogLevel.Information); // Set a minimum log level
         }
     }
 }
