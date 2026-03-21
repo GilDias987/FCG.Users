@@ -17,7 +17,7 @@ namespace FCG.Users.Domain.Entities
         }
         public void SetDateUpdate(DateTime dataAtualizacao)
         {
-            DateCreation = dataAtualizacao;
+            DateUpdate = dataAtualizacao;
         }
     }
 }
