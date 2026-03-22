@@ -13,7 +13,7 @@
             // 2. Configura especificamente o Logging para o Application Insights
             builder.Logging.AddApplicationInsights(
                 configureTelemetryConfiguration: (config) =>
-                    config.ConnectionString = builder.Configuration["ApplicationInsights:ConnectionString"],
+                    config.ConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
                 configureApplicationInsightsLoggerOptions: (options) => 
                 {
                     options.IncludeScopes = true;

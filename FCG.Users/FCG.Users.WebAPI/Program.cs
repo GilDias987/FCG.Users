@@ -35,7 +35,7 @@ builder.Services.AddOpenApiDocument(options =>
         Name = "Authorization",
         Scheme = "Bearer"
     });
-
+     
     options.OperationProcessors.Add(
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
