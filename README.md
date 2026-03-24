@@ -16,10 +16,10 @@ Este serviço é um consumidor puramente reativo.
 ## 3. Tecnologias
 * **Linguagem:** .NET 10
 * **Banco de Dados:** SQL Server
-* **Mensageria:** RabbitMQ (via MassTransit)
 * **Padrões:** MediatR, FluentValidation
 * **Documentação:** Swagger
 * **Orquestração:** Docker & Kubernetes
+* **Observabilidade:** ILogger e tabela de "Auditoria"
 * **Azure:**
   * `Serviço de Aplicativo (App Service)`: Utilizado para hospedar as APIs principais (api-catalog, api-notifications, api-payments, api-users). São ambientes gerenciados para rodar aplicações web e APIs.
   * `Plano do Serviço de Aplicativo (App Service Plan)`: Representa os recursos de hardware (CPU e Memória) onde os App Services rodam.
