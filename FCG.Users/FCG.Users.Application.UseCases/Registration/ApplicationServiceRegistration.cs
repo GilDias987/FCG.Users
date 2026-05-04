@@ -1,5 +1,4 @@
-﻿using FCG.Users.Application.Interface.Repository;
-using FCG.Users.Application.Interface.Service;
+﻿using FCG.Users.Application.Interface.Service;
 using FCG.Users.Application.UseCases.Behaviour;
 using FCG.Users.Application.UseCases.Service;
 using FluentValidation;
