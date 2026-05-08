@@ -57,9 +57,10 @@ steps:
       IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
       echo "Building image: $IMAGE"
 
-      cd FCG.Users/FCG.Users.WebAPI
-      docker build -t "$IMAGE" -f Dockerfile .
+      cd FCG.Users
+      docker build -t "$IMAGE" -f FCG.Users.WebAPI/Dockerfile .
       docker push "$IMAGE"
+
 
 # 3) Deploy no AKS com rolling update
 - task: AzureCLI@2
