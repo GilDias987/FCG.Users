@@ -36,7 +36,7 @@ steps:
     version: '10.x'
 
 - script: |
-    ls
+    cd FCG.Users
     dotnet restore
     dotnet build --configuration Release --no-restore
     dotnet test --configuration Release --no-build
@@ -51,7 +51,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       set -e
-
+      
       az acr login --name $(acrName)
 
       IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
