@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: users-api-config
+  namespace: fcg-prod
+data:
+  RABBITMQ__URL: "rabbitmq"
+  RABBITMQ__USERNAME: "admin"
+  LOGGING__LOGLEVEL__DEFAULT: "Information"
+  LOGGING__LOGLEVEL__MICROSOFT.ASPNETCORE: "Warning"
+  ALLOWEDHOSTS: "*"
