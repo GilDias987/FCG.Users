@@ -78,16 +78,16 @@ steps:
         --overwrite-existing
       
       # garante namespace
-      kubectl get ns $(namespace) || kubectl apply -f k8s/00-namespace.yaml
+      kubectl get ns $(namespace) || kubectl apply -f k8s/namespace.yaml
       
       # aplica service e ingress (idempotente)
-      kubectl apply -n $(namespace) -f k8s/20-service.yaml
-      if [ -f k8s/30-ingress.yaml ]; then
-        kubectl apply -n $(namespace) -f k8s/30-ingress.yaml
+      kubectl apply -n $(namespace) -f k8s/service.yaml
+      if [ -f k8s/ingress.yaml ]; then
+        kubectl apply -n $(namespace) -f k8s/ingress.yaml
       fi
       
       # aplica deployment base (com placeholder)
-      kubectl apply -n $(namespace) -f k8s/10-deployment.yaml
+      kubectl apply -n $(namespace) -f k8s/deployment.yaml
       
       # troca a imagem para a tag do build (isso dispara RollingUpdate)
       IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
