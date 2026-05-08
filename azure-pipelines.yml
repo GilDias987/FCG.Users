@@ -39,9 +39,9 @@ steps:
     ls
     cd FCG.Users
     ls
-    dotnet restore
-    dotnet build --configuration Release --no-restore
-    dotnet test --configuration Release --no-build
+    dotnet restore FCG.Users.slnx
+    dotnet build FCG.Users.slnx --configuration Release --no-restore
+    dotnet test FCG.Users.slnx --configuration Release --no-build
   displayName: 'Build & Test'
 
 # 2) Build + Push da imagem no ACR via AzureCLI (sem depender de Docker service connection)
