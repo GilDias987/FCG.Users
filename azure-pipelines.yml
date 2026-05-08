@@ -36,7 +36,9 @@ steps:
     version: '10.x'
 
 - script: |
+    ls
     cd FCG.Users
+    ls
     dotnet restore
     dotnet build --configuration Release --no-restore
     dotnet test --configuration Release --no-build
