@@ -3,8 +3,16 @@ kind: Deployment
 metadata:
   name: usersapi
   namespace: fcg-prod
+  labels:
+    app: usersapi
 spec:
   replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: usersapi
@@ -15,9 +23,32 @@ spec:
     spec:
       containers:
         - name: usersapi
-          image: acrfcgprod.azurecr.io/usersapi:latest
+          image: acrfcgprod.azurecr.io/usersapi:__TAG__
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+
+          # ✅ Rolling update “de verdade”: só troca quando estiver pronto
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+
+          # ✅ Se travar, reinicia
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+
           resources:
             requests:
               cpu: "100m"
