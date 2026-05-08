@@ -12,7 +12,7 @@ trigger:
 pool: 'Azure Pipelines'
 
 variables:
-  azureServiceConnection: 'scn-FCG'
+  azureServiceConnection: 'FCG-FIAP(a9158924-43a8-4208-9f49-fec0ee156c66)'
   aksResourceGroup: 'GRP-FCG'
   aksClusterName: 'aks-fcg-prod'
   namespace: 'fcg-prod'
@@ -63,38 +63,38 @@ steps:
 - task: AzureCLI@2
   displayName: 'Deploy to AKS (Rolling Update)'
   inputs:
-    azureSubscription: '$(azureServiceConnection)'  # Service Connection ARM 【2-a45036】
-    scriptType: bash
-    scriptLocation: inlineScript
+    azureSubscription: 'FCG-FIAP(a9158924-43a8-4208-9f49-fec0ee156c66)'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
     inlineScript: |
       set -e
-
+      
       az aks get-credentials \
         --resource-group $(aksResourceGroup) \
         --name $(aksClusterName) \
         --overwrite-existing
-
+      
       # garante namespace
       kubectl get ns $(namespace) || kubectl apply -f k8s/00-namespace.yaml
-
+      
       # aplica service e ingress (idempotente)
       kubectl apply -n $(namespace) -f k8s/20-service.yaml
       if [ -f k8s/30-ingress.yaml ]; then
         kubectl apply -n $(namespace) -f k8s/30-ingress.yaml
       fi
-
+      
       # aplica deployment base (com placeholder)
       kubectl apply -n $(namespace) -f k8s/10-deployment.yaml
-
+      
       # troca a imagem para a tag do build (isso dispara RollingUpdate)
       IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
       echo "Setting image: $IMAGE"
-
+      
       kubectl set image -n $(namespace) deployment/$(containerName) \
         $(containerName)="$IMAGE"
-
+      
       # espera finalizar rollout
       kubectl rollout status -n $(namespace) deployment/$(containerName) --timeout=300s
-
+      
       # mostra pods
       kubectl get pods -n $(namespace) -l app=$(containerName)
