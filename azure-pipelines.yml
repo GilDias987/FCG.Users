@@ -1,19 +1,100 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- release
+  branches:
+    include:
+      - release
+  paths:
+    include:
+      - FCG.Users/**
+      - FCG.Users/k8s/**
+      - FCG.Users/FCG.Users.WebAPI/Dockerfile
+      - azure-pipelines.yml
 
-pool:
-  vmImage: ubuntu-latest
+pool: 'Azure Pipelines'
+
+variables:
+  azureServiceConnection: 'scn-FCG'
+  aksResourceGroup: 'GRP-FCG'
+  aksClusterName: 'aks-fcg-prod'
+  namespace: 'fcg-prod'
+
+  acrName: 'acrfcgprod'
+  imageRepository: 'usersapi'
+  containerName: 'usersapi'
+  containerPort: '8080'
+
+  # tag imutável (melhor para rastreabilidade)
+  imageTag: '$(Build.SourceVersion)'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- checkout: self
+
+# 1) Build/Test (.NET) - ajuste para seu path/solution
+- task: UseDotNet@2
+  displayName: 'Use .NET SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '10.x'
 
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    dotnet restore
+    dotnet build --configuration Release --no-restore
+    dotnet test --configuration Release --no-build
+  displayName: 'Build & Test'
+
+# 2) Build + Push da imagem no ACR via AzureCLI (sem depender de Docker service connection)
+- task: AzureCLI@2
+  displayName: 'Docker build & push (ACR)'
+  inputs:
+    azureSubscription: '$(azureServiceConnection)'  # Service Connection ARM 【2-a45036】
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -e
+
+      az acr login --name $(acrName)
+
+      IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
+      echo "Building image: $IMAGE"
+
+      docker build -t "$IMAGE" -f Dockerfile .
+      docker push "$IMAGE"
+
+# 3) Deploy no AKS com rolling update
+- task: AzureCLI@2
+  displayName: 'Deploy to AKS (Rolling Update)'
+  inputs:
+    azureSubscription: '$(azureServiceConnection)'  # Service Connection ARM 【2-a45036】
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -e
+
+      az aks get-credentials \
+        --resource-group $(aksResourceGroup) \
+        --name $(aksClusterName) \
+        --overwrite-existing
+
+      # garante namespace
+      kubectl get ns $(namespace) || kubectl apply -f k8s/00-namespace.yaml
+
+      # aplica service e ingress (idempotente)
+      kubectl apply -n $(namespace) -f k8s/20-service.yaml
+      if [ -f k8s/30-ingress.yaml ]; then
+        kubectl apply -n $(namespace) -f k8s/30-ingress.yaml
+      fi
+
+      # aplica deployment base (com placeholder)
+      kubectl apply -n $(namespace) -f k8s/10-deployment.yaml
+
+      # troca a imagem para a tag do build (isso dispara RollingUpdate)
+      IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
+      echo "Setting image: $IMAGE"
+
+      kubectl set image -n $(namespace) deployment/$(containerName) \
+        $(containerName)="$IMAGE"
+
+      # espera finalizar rollout
+      kubectl rollout status -n $(namespace) deployment/$(containerName) --timeout=300s
+
+      # mostra pods
+      kubectl get pods -n $(namespace) -l app=$(containerName)
