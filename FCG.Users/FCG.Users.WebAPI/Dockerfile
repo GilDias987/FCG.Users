@@ -12,8 +12,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-RUN ls -la
-COPY ["FCG.Users/FCG.Users.WebAPI/FCG.Users.WebAPI.csproj", "FCG.Users.WebAPI/"]
+COPY ["FCG.Users.WebAPI/FCG.Users.WebAPI.csproj", "FCG.Users.WebAPI/"]
 RUN dotnet restore "./FCG.Users.WebAPI/FCG.Users.WebAPI.csproj"
 COPY . .
 WORKDIR "/src/FCG.Users.WebAPI"
