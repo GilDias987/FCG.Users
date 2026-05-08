@@ -75,7 +75,7 @@
           --name $(aksClusterName) \
           --overwrite-existing
 
-        ls -la
+        cd FCG.Users
         # garante namespace
         kubectl get ns $(namespace) || kubectl apply -f k8s/namespace.yaml
 
