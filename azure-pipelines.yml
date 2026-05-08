@@ -23,7 +23,7 @@
     containerPort: '8080'
 
     # tag imutável (melhor para rastreabilidade)
-    imageTag: '$(Build.SourceVersion)'
+    imageTag: 'latest'
 
   steps:
   - checkout: self
