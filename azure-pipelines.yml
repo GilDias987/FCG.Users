@@ -1,109 +1,145 @@
-trigger:
-  branches:
-    include:
-      - release
-  paths:
-    include:
-      - FCG.Users/**
-      - FCG.Users/k8s/**
-      - FCG.Users/FCG.Users.WebAPI/Dockerfile
-      - azure-pipelines.yml
+  trigger:
+    branches:
+      include:
+        - release
+    paths:
+      include:
+        - FCG.Users/**
+        - FCG.Users/k8s/**
+        - FCG.Users/FCG.Users.WebAPI/Dockerfile
+        - azure-pipelines.yml
 
-pool: 'Azure Pipelines'
+  pool: 'Azure Pipelines'
 
-variables:
-  azureServiceConnection: 'FCG-FIAP(a9158924-43a8-4208-9f49-fec0ee156c66)'
-  aksResourceGroup: 'GRP-FCG'
-  aksClusterName: 'aks-fcg-prod'
-  namespace: 'fcg-prod'
+  variables:
+    azureServiceConnection: 'FCG-FIAP(a9158924-43a8-4208-9f49-fec0ee156c66)'
+    aksResourceGroup: 'GRP-FCG'
+    aksClusterName: 'aks-fcg-prod'
+    namespace: 'fcg-prod'
 
-  acrName: 'acrfcgprod'
-  imageRepository: 'usersapi'
-  containerName: 'usersapi'
-  containerPort: '8080'
+    acrName: 'acrfcgprod'
+    imageRepository: 'usersapi'
+    containerName: 'usersapi'
+    containerPort: '8080'
 
-  # tag imutável (melhor para rastreabilidade)
-  imageTag: '$(Build.SourceVersion)'
+    # tag imutável (melhor para rastreabilidade)
+    imageTag: '$(Build.SourceVersion)'
 
-steps:
-- checkout: self
+  steps:
+  - checkout: self
 
-# 1) Build/Test (.NET) - ajuste para seu path/solution
-- task: UseDotNet@2
-  displayName: 'Use .NET SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '10.x'
+  # 1) Build/Test (.NET) - ajuste para seu path/solution
+  - task: UseDotNet@2
+    displayName: 'Use .NET SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '10.x'
 
-- script: |
-    cd FCG.Users
-    dotnet restore FCG.Users.slnx
-    dotnet build FCG.Users.slnx --configuration Release --no-restore
-    dotnet test FCG.Users.slnx --configuration Release --no-build
-  displayName: 'Build & Test'
-
-# 2) Build + Push da imagem no ACR via AzureCLI (sem depender de Docker service connection)
-- task: AzureCLI@2
-  displayName: 'Docker build & push (ACR)'
-  inputs:
-    azureSubscription: '$(azureServiceConnection)'  # Service Connection ARM 【2-a45036】
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      set -e
-      
-      az acr login --name $(acrName)
-
-      IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
-      echo "Building image: $IMAGE"
-
+  - script: |
       cd FCG.Users
-      docker build -t "$IMAGE" -f FCG.Users.WebAPI/Dockerfile .
-      docker push "$IMAGE"
+      dotnet restore FCG.Users.slnx
+      dotnet build FCG.Users.slnx --configuration Release --no-restore
+      dotnet test FCG.Users.slnx --configuration Release --no-build
+    displayName: 'Build & Test'
 
+  # 2) Build + Push da imagem no ACR via AzureCLI (sem depender de Docker service connection)
+  - task: AzureCLI@2
+    displayName: 'Docker build & push (ACR)'
+    inputs:
+      azureSubscription: '$(azureServiceConnection)'  # Service Connection ARM 【2-a45036】
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -e
+        
+        az acr login --name $(acrName)
 
-# 3) Deploy no AKS com rolling update
-- task: AzureCLI@2
-  displayName: 'Deploy to AKS (Rolling Update)'
-  inputs:
-    azureSubscription: '$(azureServiceConnection)'   # use a service connection 【2-900e89】
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      set -e
+        IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
+        echo "Building image: $IMAGE"
 
-      az aks get-credentials \
-        --resource-group $(aksResourceGroup) \
-        --name $(aksClusterName) \
-        --overwrite-existing
+        cd FCG.Users
+        docker build -t "$IMAGE" -f FCG.Users.WebAPI/Dockerfile .
+        docker push "$IMAGE"
+  # 3) Deploy no AKS com rolling update
+  - task: AzureCLI@2
+    displayName: 'Deploy to AKS (Rolling Update)'
+    inputs:
+      azureSubscription: 'FCG-FIAP(a9158924-43a8-4208-9f49-fec0ee156c66)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        set -e
 
-      echo "PWD=$(pwd)"
-      echo "Repo root listing:"
-      ls -la
-      echo "FCG.Users/k8s listing:"
-      ls -la FCG.Users/k8s
+        az aks get-credentials \
+          --resource-group $(aksResourceGroup) \
+          --name $(aksClusterName) \
+          --overwrite-existing
 
-      # garante namespace (corrigido caminho)
-      kubectl get ns $(namespace) || kubectl apply -f FCG.Users/k8s/namespace.yaml
+        # garante namespace
+        kubectl get ns $(namespace) || kubectl apply -f k8s/namespace.yaml
 
-      # aplica service e ingress (corrigido caminho)
-      kubectl apply -n $(namespace) -f FCG.Users/k8s/service.yaml
-      if [ -f FCG.Users/k8s/ingress.yaml ]; then
-        kubectl apply -n $(namespace) -f FCG.Users/k8s/ingress.yaml
-      fi
+        # aplica service e ingress (idempotente)
+        kubectl apply -n $(namespace) -f k8s/service.yaml
+        if [ -f k8s/ingress.yaml ]; then
+          kubectl apply -n $(namespace) -f k8s/ingress.yaml
+        fi
 
-      # aplica deployment
-      kubectl apply -n $(namespace) -f FCG.Users/k8s/deployment.yaml
+        # aplica deployment base
+        kubectl apply -n $(namespace) -f k8s/deployment.yaml
 
-      # troca a imagem para a tag do build (isso dispara RollingUpdate)
-      IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
-      echo "Setting image: $IMAGE"
+        # troca a imagem
+        IMAGE="$(acrName).azurecr.io/$(imageRepository):$(imageTag)"
+        echo "Setting image: $IMAGE"
 
-      kubectl set image -n $(namespace) deployment/$(containerName) \
-        $(containerName)="$IMAGE"
+        kubectl set image -n $(namespace) deployment/$(containerName) \
+          $(containerName)="$IMAGE"
 
-      # espera finalizar rollout
-      kubectl rollout status -n $(namespace) deployment/$(containerName) --timeout=300s
+        # --- Rolling Update com auditoria (NOVO) ---
+        ROLL_OUT_TIMEOUT="600s"
+        echo "== Rollout status (timeout=$ROLL_OUT_TIMEOUT) =="
+        kubectl rollout status -n $(namespace) deployment/$(containerName) --timeout=$ROLL_OUT_TIMEOUT || {
+          echo ""
+          echo "============================"
+          echo "❌ ROLLOUT TIMEOUT/FAIL"
+          echo "Coletando auditoria/diagnóstico..."
+          echo "============================"
 
-      # mostra pods
-      kubectl get pods -n $(namespace) -l app=$(containerName)
+          echo ""
+          echo "== Deploy describe =="
+          kubectl describe deployment/$(containerName) -n $(namespace) || true
+
+          echo ""
+          echo "== ReplicaSets =="
+          kubectl get rs -n $(namespace) -l app=$(containerName) -o wide || true
+
+          echo ""
+          echo "== Pods (wide) =="
+          kubectl get pods -n $(namespace) -l app=$(containerName) -o wide || true
+
+          echo ""
+          echo "== Events (últimos 60) =="
+          kubectl get events -n $(namespace) --sort-by=.metadata.creationTimestamp | tail -n 60 || true
+
+          echo ""
+          echo "== Pods não-ready (tentando pegar 1) =="
+          BADPOD=$(kubectl get pods -n $(namespace) -l app=$(containerName) --no-headers 2>/dev/null | awk '$2 !~ /2\\/2|1\\/1/ {print $1; exit}')
+          if [ -n "$BADPOD" ]; then
+            echo "Pod problema: $BADPOD"
+            echo ""
+            echo "== Describe Pod ($BADPOD) =="
+            kubectl describe pod -n $(namespace) "$BADPOD" || true
+            echo ""
+            echo "== Logs atuais ($BADPOD) =="
+            kubectl logs -n $(namespace) "$BADPOD" --tail=200 || true
+            echo ""
+            echo "== Logs anteriores (se restart) ($BADPOD) =="
+            kubectl logs -n $(namespace) "$BADPOD" -p --tail=200 || true
+          else
+            echo "Nenhum pod 'não-ready' identificado pelo filtro."
+          fi
+
+          exit 1
+        }
+
+        echo "✅ Rollout concluído."
+        kubectl get pods -n $(namespace) -l app=$(containerName) -o wide
