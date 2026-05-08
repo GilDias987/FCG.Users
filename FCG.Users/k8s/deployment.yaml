@@ -13,21 +13,83 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
+
   selector:
     matchLabels:
       app: usersapi
+
   template:
     metadata:
       labels:
         app: usersapi
     spec:
+      # ✅ Volume CSI para Key Vault
+      volumes:
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: usersapi-kv
+
       containers:
         - name: usersapi
           image: acrfcgprod.azurecr.io/usersapi:latest
           imagePullPolicy: IfNotPresent
+
           ports:
             - name: http
               containerPort: 8080
+
+          # ✅ Monta o volume CSI (sem isso, o CSI não injeta nada)
+          volumeMounts:
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+
+          # ✅ Variáveis necessárias (como você listou)
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Development"
+
+            - name: ASPNETCORE_URLS
+              value: "http://+:8080"
+
+            - name: ConnectionStrings__ConnectionStrings
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: CONNECTIONSTRINGS__CONNECTIONSTRINGS
+
+            - name: Jwt__Issuer
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: JWT__ISSUER
+
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: JWT__KEY
+
+            - name: Rabbitmq__Url
+              valueFrom:
+                configMapKeyRef:
+                  name: users-api-config
+                  key: RABBITMQ__URL
+
+            - name: Rabbitmq__Username
+              valueFrom:
+                configMapKeyRef:
+                  name: users-api-config
+                  key: RABBITMQ__USERNAME
+
+            - name: Rabbitmq__Password
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: RABBITMQ__PASSWORD
 
           # ✅ Rolling update “de verdade”: só troca quando estiver pronto
           readinessProbe:
