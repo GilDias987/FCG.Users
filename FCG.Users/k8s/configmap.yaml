@@ -2,9 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: users-api-config
-  labels:
-    app: users-api
+  namespace: fcg-prod
 data:
-  rabbitHost: "rabbitmq"
-
-  # colocar nome das filas aqui quando tiver mais detalhes
+  RABBITMQ__URL: "rabbitmq"
+  RABBITMQ__USERNAME: "admin"
+  LOGGING__LOGLEVEL__DEFAULT: "Information"
+  LOGGING__LOGLEVEL__MICROSOFT.ASPNETCORE: "Warning"
+  ALLOWEDHOSTS: "*"
