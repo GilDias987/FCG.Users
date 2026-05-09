@@ -73,23 +73,29 @@ spec:
                   name: users-api-secret
                   key: JWT__KEY
 
-            - name: Rabbitmq__Url
-              valueFrom:
-                configMapKeyRef:
-                  name: users-api-config
-                  key: RABBITMQ__URL
-
-            - name: Rabbitmq__Username
-              valueFrom:
-                configMapKeyRef:
-                  name: users-api-config
-                  key: RABBITMQ__USERNAME
-
-            - name: Rabbitmq__Password
+            - name: Redis__ConnectionString
               valueFrom:
                 secretKeyRef:
                   name: users-api-secret
-                  key: RABBITMQ__PASSWORD
+                  key: REDIS__CONNECTIONSTRING
+
+            - name: Mongodbsql__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: MONGODBSQL__CONNECTIONSTRING
+
+            - name: ServiceBus__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: SERVICEBUS__CONNECTIONSTRING
+
+            - name: ApplicationInsights__ConnectionString
+              valueFrom:
+                secretKeyRef:
+                  name: users-api-secret
+                  key: APPLICATIONINSIGHTS__CONNECTIONSTRING
 
           # ✅ Rolling update “de verdade”: só troca quando estiver pronto
           readinessProbe:
