@@ -34,7 +34,7 @@ spec:
 
       containers:
         - name: usersapi
-          image: acrfcgprod.azurecr.io/usersapi:latest
+          image: acrfcgprod.azurecr.io/usersapi:__TAG__
           imagePullPolicy: IfNotPresent
 
           ports:
