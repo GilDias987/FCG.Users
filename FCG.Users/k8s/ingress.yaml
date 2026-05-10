@@ -14,7 +14,7 @@ spec:
   tls:
   - hosts:
     - api.fcg.com
-    secretName: catalog-tls
+    secretName: users-tls
 
   rules:
     - http:
