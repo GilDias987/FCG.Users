@@ -13,7 +13,7 @@ spec:
   
   tls:
   - hosts:
-    - api.fcg.com
+    - fcg-ingress.brazilsouth.cloudapp.azure.com
     secretName: users-tls
 
   rules:
