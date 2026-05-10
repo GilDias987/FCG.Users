@@ -15,7 +15,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configura o ILogger para ler o appsettings.json
-builder.AddLogging();
+builder.Services.AddLogging();
 
 // Add services to the container.
 builder.Services.AddControllers();
