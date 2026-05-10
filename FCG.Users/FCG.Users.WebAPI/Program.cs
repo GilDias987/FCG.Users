@@ -25,7 +25,6 @@ builder.Services.AddOpenApiDocument(options =>
 {
     options.Title = "Api Users - Fiap Cloud Game";
     options.Version = "1.0";
-
     options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
     {
         Description = "Bearer token authorization header",
@@ -53,8 +52,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
+}).AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
@@ -88,7 +86,6 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-
 var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor
@@ -99,44 +96,32 @@ forwardedOptions.KnownNetworks.Clear();
 forwardedOptions.KnownProxies.Clear();
 app.UseForwardedHeaders(forwardedOptions);
 
-app.Use((context, next) =>
+var pathBase = Environment.GetEnvironmentVariable("PATH_BASE");
+if (!string.IsNullOrWhiteSpace(pathBase))
 {
-    if (context.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var prefixValues))
-    {
-        var prefix = prefixValues.ToString().Trim();
-        if (!string.IsNullOrWhiteSpace(prefix))
-        {
-            if (!prefix.StartsWith("/")) prefix = "/" + prefix;
-            prefix = prefix.TrimEnd('/');
-
-            context.Request.PathBase = prefix;
-        }
-    }
-
-    return next();
-});
-
+    if (!pathBase.StartsWith("/")) pathBase = "/" + pathBase;
+    pathBase = pathBase.TrimEnd('/');
+    app.UsePathBase(pathBase);
+}
 
 app.UseOpenApi(settings =>
 {
     settings.PostProcess = (document, request) =>
     {
-        var prefix = request.PathBase.HasValue ? request.PathBase.Value : "";
-
         document.Servers.Clear();
         document.Servers.Add(new OpenApiServer
         {
-            Url = $"{request.Scheme}://{request.Host.Value}{prefix}"
+            Url = $"{request.Scheme}://{request.Host.Value}{request.PathBase}"
         });
     };
 
     settings.CreateDocumentCacheKey = request =>
         request.Headers["X-Forwarded-Host"].FirstOrDefault()
-        + request.Headers["X-Forwarded-Prefix"].FirstOrDefault()
+        + request.PathBase
         + request.IsHttps;
-});
+}); 
 
-app.UseSwaggerUI();
+app.UseSwaggerUI(); 
 
 app.UseHttpsRedirection();
 
@@ -144,6 +129,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 app.MapHealthChecks("/health");
 
 app.UseExceptionHandler();
