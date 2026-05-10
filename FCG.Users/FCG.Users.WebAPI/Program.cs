@@ -105,6 +105,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapHealthChecks("/health");
+
 app.UseExceptionHandler();
 
 using (var scope = app.Services.CreateScope())
