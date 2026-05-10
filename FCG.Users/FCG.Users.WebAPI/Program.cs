@@ -4,7 +4,6 @@ using FCG.Users.Application.UseCases.Interceptor;
 using FCG.Users.Application.UseCases.Registration;
 using FCG.Users.Infrastructure.Context;
 using FCG.Users.Infrastructure.Repository;
-using FCG.Users.WebAPI.Configurations;
 using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,7 +33,7 @@ builder.Services.AddOpenApiDocument(options =>
         Name = "Authorization",
         Scheme = "Bearer"
     });
-     
+
     options.OperationProcessors.Add(
         new NSwag.Generation.Processors.Security.AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
@@ -42,7 +41,7 @@ builder.Services.AddOpenApiDocument(options =>
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddScoped<AuditInterceptor>();
-builder.Services.AddDbContext<ApplicationDbContext>((sp,options) => 
+builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseSqlServer(sqlConn);
     options.AddInterceptors(sp.GetRequiredService<AuditInterceptor>());
