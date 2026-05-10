@@ -7,8 +7,10 @@ using FCG.Users.Infrastructure.Repository;
 using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NSwag; 
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,13 +20,12 @@ builder.Services.AddLogging();
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
 
 builder.Services.AddOpenApiDocument(options =>
 {
     options.Title = "Api Users - Fiap Cloud Game";
     options.Version = "1.0";
+
     options.AddSecurity("Bearer", new NSwag.OpenApiSecurityScheme
     {
         Description = "Bearer token authorization header",
@@ -48,12 +49,12 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 });
 
 #region [JWT]
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
     options.SaveToken = true;
@@ -67,7 +68,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
-
 #endregion
 
 #region Exception Global
@@ -79,7 +79,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
 #endregion
 
-
 builder.Services.AddProblemDetails();
 
 builder.Services.AddAuthorization(options =>
@@ -89,22 +88,62 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
-//if (app.Environment.IsDevelopment())
-//{
-app.UseOpenApi();
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                     | ForwardedHeaders.XForwardedProto
+                     | ForwardedHeaders.XForwardedHost
+};
+forwardedOptions.KnownNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
+
+app.Use((context, next) =>
+{
+    if (context.Request.Headers.TryGetValue("X-Forwarded-Prefix", out var prefixValues))
+    {
+        var prefix = prefixValues.ToString().Trim();
+        if (!string.IsNullOrWhiteSpace(prefix))
+        {
+            if (!prefix.StartsWith("/")) prefix = "/" + prefix;
+            prefix = prefix.TrimEnd('/');
+
+            context.Request.PathBase = prefix;
+        }
+    }
+
+    return next();
+});
+
+
+app.UseOpenApi(settings =>
+{
+    settings.PostProcess = (document, request) =>
+    {
+        var prefix = request.PathBase.HasValue ? request.PathBase.Value : "";
+
+        document.Servers.Clear();
+        document.Servers.Add(new OpenApiServer
+        {
+            Url = $"{request.Scheme}://{request.Host.Value}{prefix}"
+        });
+    };
+
+    settings.CreateDocumentCacheKey = request =>
+        request.Headers["X-Forwarded-Host"].FirstOrDefault()
+        + request.Headers["X-Forwarded-Prefix"].FirstOrDefault()
+        + request.IsHttps;
+});
+
 app.UseSwaggerUI();
-//}
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
-
 app.MapHealthChecks("/health");
 
 app.UseExceptionHandler();
