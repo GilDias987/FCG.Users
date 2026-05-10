@@ -106,7 +106,7 @@ steps:
         $(containerName)="$IMAGE"
 
       # 5) Rollout + auditoria
-      ROLL_OUT_TIMEOUT="600s"
+      ROLL_OUT_TIMEOUT="60s"
       echo "== Rollout status (timeout=$ROLL_OUT_TIMEOUT) =="
       kubectl rollout status -n $(namespace) deployment/$(containerName) --timeout=$ROLL_OUT_TIMEOUT || {
         echo ""
