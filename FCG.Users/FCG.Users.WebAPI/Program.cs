@@ -2,6 +2,7 @@ using FCG.Users.Application.Interface.Repository;
 using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserSeed;
 using FCG.Users.Application.UseCases.Interceptor;
 using FCG.Users.Application.UseCases.Registration;
+using FCG.Users.Application.UseCases.Service;
 using FCG.Users.Infrastructure.Context;
 using FCG.Users.Infrastructure.Repository;
 using FCG.Users.WebAPI.Middleware;
@@ -9,12 +10,13 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configura o ILogger para ler o appsettings.json
-builder.AddLogging();
+//builder.AddLogging();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -40,7 +42,16 @@ builder.Services.AddOpenApiDocument(options =>
 
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration["Mongodbsql:ConnectionString"];
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddSingleton<MongoAuditService>();
 builder.Services.AddScoped<AuditInterceptor>();
+
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseSqlServer(sqlConn);
