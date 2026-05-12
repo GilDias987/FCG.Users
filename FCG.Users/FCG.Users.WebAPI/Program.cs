@@ -8,10 +8,11 @@ using FCG.Users.Infrastructure.Repository;
 using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides; 
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
+using NSwag;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -129,9 +130,9 @@ app.UseOpenApi(settings =>
         request.Headers["X-Forwarded-Host"].FirstOrDefault()
         + request.PathBase
         + request.IsHttps;
-}); 
+});
 
-app.UseSwaggerUI(); 
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
