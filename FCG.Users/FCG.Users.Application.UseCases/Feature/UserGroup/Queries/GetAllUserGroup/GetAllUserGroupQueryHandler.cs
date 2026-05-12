@@ -5,7 +5,6 @@ using MediatR;
 
 namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGroup
 {
-
     public class GetAllUserGroupQueryHandler : IRequestHandler<GetAllUserGroupQuery, List<UserGroupDto>>
     {
         private readonly IUserGroupRepository _userGroupRepository;
@@ -27,17 +26,11 @@ namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGro
                 return cached;
 
             var lstUserGroup = _userGroupRepository.All
-                .Select(x => new UserGroupDto
-                {
-                    Id = x.Id,
-                    Name = x.Name
-                })
-                .ToList();
+                .Select(x => new UserGroupDto { Id = x.Id, Name = x.Name }).ToList();
 
             if (!lstUserGroup.Any())
                 throw new ArgumentException("Nenhum registro encontrado.");
 
-            // 💾 3. salva no cache
             await _cache.SetAsync(CacheKey, lstUserGroup, TimeSpan.FromMinutes(10));
 
             return lstUserGroup;
