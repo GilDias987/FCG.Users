@@ -1,23 +1,25 @@
-﻿using Azure.Messaging.ServiceBus.Administration;
-using FCG.Users.Application.Interface.Service;
-using FCG.Users.Domain.Entities;
-using MassTransit;
+﻿using FCG.Users.Application.Interface.Service;
+using FCG.Users.Application.UseCases.Service;
+using FCG.Users.Domain.Documents;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
 
 
 namespace FCG.Users.Application.UseCases.Interceptor
 {
     public class AuditInterceptor : SaveChangesInterceptor
     {
+        private readonly MongoAuditService _auditService;
         private readonly IUserService _userService;
 
-        public AuditInterceptor(IUserService userService)
+        private readonly List<(EntityEntry Entry, AuditDocument Audit)> _pendingAudits = [];
+
+        public AuditInterceptor(
+            MongoAuditService auditService,
+            IUserService userService)
         {
+            _auditService = auditService;
             _userService = userService;
         }
 
@@ -26,74 +28,90 @@ namespace FCG.Users.Application.UseCases.Interceptor
             InterceptionResult<int> result,
             CancellationToken cancellationToken = default)
         {
-            AddAuditLogs(eventData.Context);
-            return base.SavingChangesAsync(eventData, result, cancellationToken);
-        }
+            var context = eventData.Context;
 
-        private void AddAuditLogs(DbContext context)
-        {
-            if (context == null) return;
+            if (context == null)
+                return base.SavingChangesAsync(eventData, result, cancellationToken);
 
-            var auditLogs = new List<AuditLog>();
+            var entries = context.ChangeTracker.Entries()
+                .Where(x =>
+                    x.State == EntityState.Modified ||
+                    x.State == EntityState.Added ||
+                    x.State == EntityState.Deleted);
 
-            foreach (var entry in context.ChangeTracker.Entries())
+            foreach (var entry in entries)
             {
-                if (entry.Entity is AuditLog ||
-                    entry.State == EntityState.Detached ||
-                    entry.State == EntityState.Unchanged)
-                    continue;
+                var audit = CreateAudit(entry);
 
-                var audit = new AuditLog
-                {
-                    TableName = entry.Metadata.GetTableName(),
-                    Action = entry.State.ToString(),
-                    Timestamp = DateTime.UtcNow,
-                    UserId = _userService.GetUserId()
-                };
-
-                var keyValues = new Dictionary<string, object>();
-                var oldValues = new Dictionary<string, object>();
-                var newValues = new Dictionary<string, object>();
-
-                foreach (var prop in entry.Properties)
-                {
-                    var name = prop.Metadata.Name;
-
-                    if (prop.Metadata.IsPrimaryKey())
-                    {
-                        keyValues[name] = prop.CurrentValue;
-                        audit.EntityId = prop.CurrentValue?.ToString();
-                        continue;
-                    }
-
-                    switch (entry.State)
-                    {
-                        case EntityState.Added:
-                            newValues[name] = prop.CurrentValue;
-                            break;
-
-                        case EntityState.Deleted:
-                            oldValues[name] = prop.OriginalValue;
-                            break;
-
-                        case EntityState.Modified:
-                            if (prop.IsModified)
-                            {
-                                oldValues[name] = prop.OriginalValue;
-                                newValues[name] = prop.CurrentValue;
-                            }
-                            break;
-                    }
-                }
-
-                audit.KeyValues = JsonSerializer.Serialize(keyValues);
-                audit.OldValues = JsonSerializer.Serialize(oldValues);
-                audit.NewValues = JsonSerializer.Serialize(newValues);
-
-                auditLogs.Add(audit);
+                _pendingAudits.Add((entry, audit));
             }
 
-            context.Set<AuditLog>().AddRange(auditLogs);
+            return base.SavingChangesAsync(
+                eventData,
+                result,
+                cancellationToken);
+        }
+
+        public override async ValueTask<int> SavedChangesAsync(
+            SaveChangesCompletedEventData eventData,
+            int result,
+            CancellationToken cancellationToken = default)
+        {
+            foreach (var (entry, audit) in _pendingAudits)
+            {
+                // agora o ID já existe
+                audit.RecordId = entry.Properties
+                    .FirstOrDefault(p => p.Metadata.IsPrimaryKey())
+                    ?.CurrentValue
+                    ?.ToString() ?? string.Empty;
+
+                await _auditService.SaveAsync(audit);
+            }
+
+            _pendingAudits.Clear();
+
+            return await base.SavedChangesAsync(
+                eventData,
+                result,
+                cancellationToken);
+        }
+
+        private AuditDocument CreateAudit(EntityEntry entry)
+        {
+            var changes = new Dictionary<string, AuditChange>();
+
+            foreach (var property in entry.Properties)
+            {
+                if (property.Metadata.IsPrimaryKey())
+                    continue;
+
+                changes[property.Metadata.Name] = new AuditChange
+                {
+                    Old = entry.State == EntityState.Added
+                        ? null
+                        : property.OriginalValue,
+
+                    New = entry.State == EntityState.Deleted
+                        ? null
+                        : property.CurrentValue
+                };
+            }
+
+            return new AuditDocument
+            {
+                Table = entry.Metadata.GetTableName() ?? string.Empty,
+
+                Action = entry.State.ToString(),
+
+                TimestampUtc = DateTime.UtcNow,
+
+                Changes = changes,
+
+                User = new AuditUser
+                {
+                    Id = _userService.GetUserId(),
+                }
+            };
         }
     }
 }
