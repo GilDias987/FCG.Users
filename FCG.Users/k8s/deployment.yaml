@@ -52,6 +52,9 @@ spec:
             - name: ASPNETCORE_ENVIRONMENT
               value: "Development"
 
+            - name: PATH_BASE
+              value: "/users"
+
             - name: ASPNETCORE_URLS
               value: "http://+:8080"
 
