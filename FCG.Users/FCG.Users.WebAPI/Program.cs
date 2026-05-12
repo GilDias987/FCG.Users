@@ -2,24 +2,25 @@ using FCG.Users.Application.Interface.Repository;
 using FCG.Users.Application.UseCases.Feature.User.Commands.AddUserSeed;
 using FCG.Users.Application.UseCases.Interceptor;
 using FCG.Users.Application.UseCases.Registration;
+using FCG.Users.Application.UseCases.Service;
 using FCG.Users.Infrastructure.Context;
 using FCG.Users.Infrastructure.Repository;
 using FCG.Users.WebAPI.Middleware;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides; 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Driver;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configura o ILogger para ler o appsettings.json
-builder.AddLogging();
+//builder.AddLogging();
 
 // Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
 
 builder.Services.AddOpenApiDocument(options =>
 {
@@ -40,7 +41,16 @@ builder.Services.AddOpenApiDocument(options =>
 
 var sqlConn = builder.Configuration.GetConnectionString("ConnectionStrings");
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var connectionString = builder.Configuration["Mongodbsql:ConnectionString"];
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddSingleton<MongoAuditService>();
 builder.Services.AddScoped<AuditInterceptor>();
+
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     options.UseSqlServer(sqlConn);
@@ -48,7 +58,6 @@ builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 });
 
 #region [JWT]
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -67,7 +76,6 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
-
 #endregion
 
 #region Exception Global
@@ -79,7 +87,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
 #endregion
 
-
 builder.Services.AddProblemDetails();
 
 builder.Services.AddAuthorization(options =>
@@ -89,21 +96,51 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+var forwardedOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                     | ForwardedHeaders.XForwardedProto
+                     | ForwardedHeaders.XForwardedHost
+};
+forwardedOptions.KnownNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
 
-//if (app.Environment.IsDevelopment())
-//{
-app.UseOpenApi();
-app.UseSwaggerUI();
-//}
+var pathBase = Environment.GetEnvironmentVariable("PATH_BASE");
+if (!string.IsNullOrWhiteSpace(pathBase))
+{
+    if (!pathBase.StartsWith("/")) pathBase = "/" + pathBase;
+    pathBase = pathBase.TrimEnd('/');
+    app.UsePathBase(pathBase);
+}
+
+app.UseOpenApi(settings =>
+{
+    settings.PostProcess = (document, request) =>
+    {
+        document.Servers.Clear();
+        document.Servers.Add(new OpenApiServer
+        {
+            Url = $"{request.Scheme}://{request.Host.Value}{request.PathBase}"
+        });
+    };
+
+    settings.CreateDocumentCacheKey = request =>
+        request.Headers["X-Forwarded-Host"].FirstOrDefault()
+        + request.PathBase
+        + request.IsHttps;
+}); 
+
+app.UseSwaggerUI(); 
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.UseExceptionHandler();
 

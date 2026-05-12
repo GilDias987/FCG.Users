@@ -4,14 +4,23 @@ metadata:
   name: fcg-usersapi
   namespace: fcg-prod
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  
+  tls:
+  - hosts:
+    - fcg-ingress.brazilsouth.cloudapp.azure.com
+    secretName: users-tls
+
   rules:
     - http:
         paths:
-          - path: /users
-            pathType: Prefix
+          - path: /users(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: usersapi
