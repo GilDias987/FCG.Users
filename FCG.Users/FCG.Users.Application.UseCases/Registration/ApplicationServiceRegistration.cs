@@ -36,11 +36,11 @@ namespace FCG.Users.Application.UseCases.Registration
 
                 var options = ConfigurationOptions.Parse(configurationRedis);
 
-                options.ConnectTimeout = 30000;        // ⬅️ aumente para 30s
+                options.ConnectTimeout = 30000;
                 options.SyncTimeout = 30000;
                 options.AbortOnConnectFail = false;
 
-                options.Ssl = true;                    // 🔴 CRÍTICO para porta 6380
+                options.Ssl = true;
                 options.ReconnectRetryPolicy = new ExponentialRetry(5000);
 
                 return ConnectionMultiplexer.Connect(options);
