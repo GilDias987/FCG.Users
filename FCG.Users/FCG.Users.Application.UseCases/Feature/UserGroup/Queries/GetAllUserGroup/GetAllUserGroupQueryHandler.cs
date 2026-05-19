@@ -8,19 +8,19 @@ namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGro
     public class GetAllUserGroupQueryHandler : IRequestHandler<GetAllUserGroupQuery, List<UserGroupDto>>
     {
         private readonly IUserGroupRepository _userGroupRepository;
-        private readonly ICacheService _cache;
+        private readonly ICacheService _cacheService;
 
         private const string CacheKey = "user-groups:all";
 
-        public GetAllUserGroupQueryHandler(IUserGroupRepository userGroupRepository, ICacheService cache)
+        public GetAllUserGroupQueryHandler(IUserGroupRepository userGroupRepository, ICacheService cacheService)
         {
             _userGroupRepository = userGroupRepository;
-            _cache = cache;
+            _cacheService = cacheService;
         }
 
         public async Task<List<UserGroupDto>> Handle(GetAllUserGroupQuery request, CancellationToken cancellationToken)
         {
-            var cached = await _cache.GetAsync<List<UserGroupDto>>(CacheKey);
+            var cached = await _cacheService.GetAsync<List<UserGroupDto>>(CacheKey);
 
             if (cached is not null && cached.Any())
                 return cached;
@@ -31,7 +31,7 @@ namespace FCG.Users.Application.UseCases.Feature.UserGroup.Queries.GetAllUserGro
             if (!lstUserGroup.Any())
                 throw new ArgumentException("Nenhum registro encontrado.");
 
-            await _cache.SetAsync(CacheKey, lstUserGroup, TimeSpan.FromMinutes(10));
+            await _cacheService.SetAsync(CacheKey, lstUserGroup, TimeSpan.FromMinutes(10));
 
             return lstUserGroup;
         }
