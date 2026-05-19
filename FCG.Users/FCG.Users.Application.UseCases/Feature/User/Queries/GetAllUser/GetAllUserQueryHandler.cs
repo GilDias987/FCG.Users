@@ -26,7 +26,14 @@ namespace FCG.Users.Application.UseCases.Feature.User.Queries.GetAllUser
                 return cached;
 
             var lstUsers = (await _userRepository.GetAllUsers())
-                .Select(s => new UserDto{ Id = s.Id, Name = s.Name, Email = s.Email, UserGroupId = s.UserGroupId, Group = s.UserGroup.Name }).ToList();
+                .Select(s => new UserDto 
+                { 
+                    Id          = s.Id, 
+                    Name        = s.Name, 
+                    Email       = s.Email, 
+                    UserGroupId = s.UserGroupId, 
+                    Group       = s.UserGroup.Name 
+                }).ToList();
 
             if (!lstUsers.Any())
                 throw new ArgumentException("Nenhum registro encontrado.");
