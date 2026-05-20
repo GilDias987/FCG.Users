@@ -1,150 +1,164 @@
 Fiap Cloud Games (FCG)
 
-FASE 3:
+FASE 4:
 
-	A FIAP Cloud Games (FCG) segue sua evolução! Nesta fase, o foco será 
-a migração para microsserviços, a otimização da busca de jogos e a adoção de 
-soluções serverless para eficiência operacional.
-
-	O desafio desta fase foi estruturado para aplicar os conhecimentos 
-adquiridos nas disciplinas da fase, como Serverless, API Gateway, 
-Microsserviços, Arquitetura de Software e Monitoramento e Acesso.  
+	A FIAP Cloud Games (FCG) é agora uma plataforma funcional, distribuída e 
+	observável. No entanto, para atingir um nível profissional e suportar um crescimento 
+	global, a infraestrutura precisa superar três gargalos críticos:
+	
+	1. Ambiente de Produção Gerenciado: garantir o uso do Kubernetes na 
+      Cloud em favor da resiliência e da segurança. 
+	2. Automação de Entrega (CI/CD): eliminar processos manuais lentos e 
+      suscetíveis a erros. 
+	3. Performance e Latência: com o aumento do tráfego, a dependência 
+	  exclusiva de bancos relacionais e buscas simples tornou-se um impeditivo.
+	  
+	É necessário otimizar a persistência de dados e a velocidade de resposta 
+	  aos usuários.  
 
 Desafio
 
-	Após a FIAP ter conseguido identificar o valor no MVP construído 
-anteriormente e lançarmos a primeira versão para os alunos e alunas de forma 
-totalmente automática e acessível via cloud, precisamos deixar nosso sistema 
-mais robusto e modular, a fim de identificar problemas em módulos.
-
-	Sem deixarmos a aplicação totalmente fora do modelo anterior, no qual 
-seguimos com a arquitetura monolítica, vamos dar robustez a ela e separar em 
-módulos lógicos, garantindo a abordagem de microsserviços, além de seguirmos 
-uma abordagem serverless, consolidando nossa escalabilidade.
-
+	Esta fase foca em automação, performance e portabilidade. O desafio consiste em:
+	
+	• Utilizar a mesma Infraestrutura Cloud: na fase, anterior subimos o cluster 
+	  na Cloud e a aplicação rodando no Kubernetes gerenciado na nuvem de 
+	  sua preferência (AWS EKS, Azure AKS, Google GKE ou Oracle OKE). 
+	• Pipeline de CI/CD Multi-Cloud: automatizar o ciclo de vida da aplicação 
+      com GitHub Actions ou Azure DevOps.
+	• Persistência Poliglota (NoSQL): implementar MongoDB ou DynamoDB 
+      para lidar com dados não estruturados ou de alta escala. 
+	• Otimização com Cache: implementar uma camada de cache (ex.: Redis) 
+      para reduzir latência e carga nos bancos de dados. 
+	• Busca Avançada: integrar Elasticsearch (ou OpenSearch) para buscas 
+      rápidas e tolerantes a erros. 
 
 Funcionalidades Obrigatórias
-    1. Migração para Microsserviços:
-	• Separar a API em três microsserviços principais. A seguir temos exemplos 
-	    para a criação/separação de microsserviços:
-	    o Usuários: cadastro, login e gerenciamento de perfis.
-        o Jogos: listagem, compra e recomendação de jogos.
-        o Pagamentos: processamento e status de transações.
+
+	Nesta fase, a exigência é a entrega de uma solução totalmente Cloud-Native 
+	  resiliente, que utilize diferentes modelos de persistência para otimizar a performance 
+	  e a experiência do usuário.
+
+	1. Infraestrutura Gerenciada e Portabilidade (mesma estrutura da fase 
+      anterior) 
+	• Provedor de Nuvem: escolha livre entre AWS, Azure, Google Cloud (GCP) 
+	  ou Oracle Cloud (OCI).
+	• Orquestração: provisionamento de um cluster Kubernetes Gerenciado 
+	  (EKS, AKS, GKE ou OKE). Não será aceito o uso de instâncias isoladas 
+      (IaaS) para rodar containers manualmente. 
+	• Registry: utilização de um serviço de registro de imagens privado nativo da 
+	  Cloud escolhida (ex.: Amazon ECR, Azure ACR). 
+	• Exposição: a aplicação deve ser acessível externamente via Load Balancer 
+	  ou Ingress Controller configurado no cluster. 
+
+	2. Persistência Poliglota e Alta Performance 
+	• A arquitetura deve evoluir para suportar diferentes tipos de dados e cargas 
+	  de trabalho, garantindo baixa latência.
+	• NoSQL (Obrigatório): implementar MongoDB ou DynamoDB. 
+	    o Cenário de uso: deve ser utilizado para dados flexíveis ou de alta 
+		volumetria (ex.: catálogo expandido, logs de eventos, perfis de usuário ou 
+		sistema de avaliações).
+		o Implementação: utilizar os drivers oficiais para .NET (MongoDB.Driver ou 
+		AWSSDK.DynamoDBv2).
+	• Cache de Persistência (Obrigatório): implementar uma camada de cache 
+      distribuído (ex.: Redis). 
+		o Cenário de uso: persistir temporariamente dados de sessões, resultados 
+		de consultas onerosas ou configurações globais para reduzir o round-trip 
+		ao banco de dados principal. 
+		o Implementação: utilizar a biblioteca StackExchange.Redis ou abstrações 
+		do ASP.NET Core (IDistributedCache).
 		
-    2. Utilizar Serverless:
-	• Criar funções serverless para processos assíncronos, como envio de 
-        notificações e processamento de pagamentos. 
-	• Configurar gatilhos em eventos para acionar funções de forma automática.
-	• Implementar um API Gateway para gerenciar requisições dos 
-        microsserviços.
-	• Garantir segurança entre os acessos para os microsserviços.
+	3. Busca Avançada com Elasticsearch 
+	• O motor de busca deve ser independente da consulta tradicional do banco 
+	  de dados relacional. 
+	• Serviço: utilizar Amazon OpenSearch, Elastic Cloud ou uma instância 
+      gerenciada do Elasticsearch. 
+	• Sincronização: implementar a lógica de indexação no CatalogAPI. Sempre 
+	  que um jogo for inserido ou editado no banco principal, o índice no 
+	  Elasticsearch deve ser atualizado. 
+	• Funcionalidades: o endpoint de busca (/search) deve obrigatoriamente 
+	  suportar Fuzzy Search (tolerância a erros de digitação) e ordenação por 
+	  relevância.
+	  
+	4. Automação de CI/CD e GitOps 
+	• Todo o ciclo de vida do software deve ser automatizado, garantindo que o 
+	  código em main reflita o que está em produção. 
+	• Ferramentas: GitHub Actions ou Azure DevOps. 
+	• Escopo: a pipeline deve cobrir, no mínimo, os serviços UsersAPI e 
+	  CatalogAPI.
+	  
+	• Workflow: 
+	  o Build & Test: compilação do código e execução de testes unitários 
+	    automatizados.
+	  o Containerização: geração da imagem Docker com versionamento (Tags). 
+	  o Security Scan (Desejável): verificação de vulnerabilidades na imagem. 
+	  o Push: upload para o Registry da Cloud. 
+	  o Deploy: atualização do ambiente de produção (Kubernetes) sem 
+	    downtime (Rolling Update).
+		
+	5. Segurança e Gestão de Segredos 
+	• Zero Hardcoded Credentials: nenhuma string de conexão, chave de API ou 
+	  senha de banco de dados deve estar no código-fonte ou nos arquivos YAML. 
+	• Injeção de Secrets: utilizar os Secrets do Kubernetes ou serviços 
+	  gerenciados (AWS Secrets Manager/Azure Key Vault) integrados ao cluster 
+	  para injetar as credenciais em tempo de execução.
+
+Metas realizadas
 	
-	Arquitetura:
-	• Implementar event sourcing ou equivalente como temporal tables, audit 
-      logs; algo que possa usar para registrar todas as mudanças no estado do 
-      sistema.  
-	• Melhorar a observabilidade com logs e rastreamento distribuído (Traces).
-		
-
-	1. Arquitetura de Microsserviços e Repositórios: 
-	• Desenvolva quatro microsserviços distintos. 
-	• Cada microsserviço deve residir em seu próprio repositório Git, 
-		garantindo total autonomia e separação de código. 
-		o Microsserviço de Usuários (UsersAPI): responsável por cadastro, autenticação 
-		  (geração de token JWT) e autorização de usuários. 
-		o Microsserviço de Catálogo (CatalogAPI): responsável pelo CRUD de jogos e por 
-		  iniciar o fluxo de compra. 
-		o Microsserviço de Pagamentos (PaymentsAPI): responsável por processar 
-		  (simular) o pagamento de uma compra de jogo. 
-		o Microsserviço de Notificações (NotificationsAPI): responsável 
-		  por enviar (simular, logando no console) e-mails de boas-vindas e de confirmação
-		  de compra. 
-
-
-	2. Fluxos Orientados a Eventos (Mensageria com RabbitMQ ou Kafka): 
-		Fluxo de Cadastro de Usuário: 
-		1) O UsersAPI cria um novo usuário e publica um evento UserCreatedEvent. 
-		2) O NotificationsAPI consome este evento e "envia" um e-mail de boas-vindas.
-		
-	   Fluxo de Compra de Jogo: 
-		1) O CatalogAPI recebe uma requisição para adicionar um jogo à 
-		  biblioteca de um usuário e publica um evento OrderPlacedEvent, 
-		  contendo UserId, GameId e Price. 
-		2) O PaymentsAPI consome o OrderPlacedEvent, processa o 
-		  pagamento e publica o resultado em um novo evento: PaymentProcessedEvent 
-		  (com status Approved ou Rejected).
-		3) O CatalogAPI consome o PaymentProcessedEvent. Se o pagamento foi Approved, 
-		  ele adiciona o jogo à biblioteca do usuário.
-		4) O NotificationsAPI também consome o PaymentProcessedEvent. Se foi Approved, 
-		  "envia" um e-mail de confirmação da compra.
-		  
-	3. Orquestração Local e de Implantação: 
-		• Cada um dos quatro repositórios de microsserviço deve conter seu próprio 
-		  Dockerfile. 
-		• (Opcional) Se achar melhor, você pode criar um quinto repositório específico 
-		para orquestração, colocando a responsabilidade de infraestrutura nele.
-		
-	4. Orquestração com Kubernetes:
-		• Os manifestos devem estar em uma pasta /k8s na raiz do projeto de cada repositório. 
-		• É obrigatório o uso de Deployments para gerenciar os Pods. A criação de Pods de 
-		forma isolada não será aceita. 
-		• É obrigatório o uso de ConfigMaps para armazenar configurações não sensíveis 
-		(ex.: nome de filas/tópicos, URLs de serviços). 
-		• É obrigatório o uso de Secrets para armazenar dados sensíveis (ex.: connection 
-		strings de banco de dados, chaves de API).	
-
-
-    Metas realizadas
     • [x] Microsserviços Usuários, Catálogo, Pagamentos e Notificações (trabalhamos com quatro 
 	      repositórios Git distintos).
-	• [x] Criar funções serverless para processos assíncronos, como envio de 
-          notificações e processamento de pagamentos.
-    • [x] Configurar gatilhos em eventos para acionar funções de forma automática.
-    • [x] Implementar um API Gateway para gerenciar requisições dos 
-          microsserviços.
-    • [x] Garantir segurança entre os acessos para os microsserviços.
-	• [x] Criar funções Azure Functions (ou equivalente) para operações específicas.
-	• [x] Configurar triggers para acionar funções automaticamente.
-	• [x] Implementar API Gateway para gerenciar e proteger os microsserviços.
-	• [x] Configurar a autenticação JWT e o controle de requisições.
-	• [x] Implementar event sourcing ou equivalente como temporal tables, audit 
-          logs; algo que possa usar para registrar todas as mudanças no estado do 
-          sistema.
-	• [x] Melhorar a observabilidade com logs e rastreamento distribuído (Traces).
+	• [x] Ambiente de Produção Gerenciado: Garantir o uso do Kubernetes na nuvem para maximizar a resiliência 
+		  e a segurança.
+    • [x] Automação de Entrega (CI/CD): Substituição de processos manuais lentos por fluxos automatizados, 
+		  rápidos e seguros.	  
+	• [x] Pipeline CI/CD Multi-Cloud: Como automatizar o ciclo de vida da sua aplicação com Azure DevOps.
+    • [x] Implementação de arquitetura de Persistência Poliglota, utilizando MongoDB para o armazenamento 
+		  e gerenciamento eficiente de dados não estruturados e de alta escala.
+    • [x] Implementação de camada de cache com Redis, reduzindo drasticamente a latência do sistema e 
+	      mitigando a carga de requisições no banco de dados.
+    • [x] Busca Avançada: Integração do Elasticsearch para buscas rápidas, precisas e tolerantes a falhas
+	      Implementar a lógica de indexação na CatalogAPI. O índice do Elasticsearch deve ser atualizado automaticamente sempre que um jogo for inserido ou editado no banco de dados principal.
+    • [x] Gerenciamento de ambiente multi-cloud com foco em Azure Cloud, sendo responsável pela orquestração
+		  e provisionamento de clusters Kubernetes gerenciados via AKS (Azure Kubernetes Service).
+    • [x] Registry: Utilização do Azure Container Registry (ACR) como serviço nativo e privado para 
+	      armazenamento de imagens.
+    • [x] Exposição: A aplicação deve ser acessível externamente por meio de um Load Balancer ou de um 
+	      Ingress Controller configurado no cluster.
+    • [x] Ciclo de vida do software deve ser automatizado, garantindo que o código em main reflita 
+	      o que está em produção usando ferramenta Azure DevOps, Pipeline cobrir os serviços UsersAPI 
+		  e CatalogAPI.
+    • [x] Containerização, geração da imagem Docker com versionamento (Tags), Security Scan verificação
+	      de vulnerabilidades na imagem, no Deploy atualização do ambiente de produção (Kubernetes).
+    • [x] As Credentials, nenhuma string de conexão, chave de API ou senha de banco de dados deve estar
+	      no código-fonte ou nos arquivos YAML.
+    • [x] Injeção de Secrets: utilizar os Secrets do Kubernetes ou serviços gerenciados Azure Key Vault
+		  integrados ao cluster para injetar as credenciais em tempo de execução.
 	
-
-    Entregáveis da Fase 3
-	• Vídeo de até 15 minutos demonstrando todos os requisitos. Ele pode ser 
-        em grupo ou individual (um integrante do grupo grava ou é possível se 
-        dividir entre si e apresentar).
+Entregáveis da Fase 4
+	
+	1. Vídeo "Pitch Final" (até 25 min): 
+	• Demonstrar a infraestrutura rodando na nuvem escolhida (mostre o painel 
+	  da AWS/Azure e os pods no Kubernetes).
+	• Realizar um Live Deploy: altere o código, faça push e mostre a pipeline 
+	  atualizando a aplicação em produção automaticamente. 
+	• Demonstrar a Busca Avançada e o impacto positivo do Cache na resposta da API. 
+	• Explicar como o NoSQL foi integrado à arquitetura.
+	
+	2. Repositórios de Código: 
+	• Código atualizado com os novos drivers de NoSQL e Cache. 
+	• Arquivos YAML de infraestrutura (Terraform, CloudFormation ou Manifestos K8s). 
+	• Definições de Pipeline (.yml).
 		
-		o O projeto deve rodar na cloud (à sua escolha), apresentando os 
-          requisitos anteriores.  
-		o Se o requisito técnico estiver com a flag (Opcional), isso significa 
-          que caso ele não seja implementado não descontaremos pontos.  
-		o A infraestrutura não precisa ficar em pé até a avaliação: após gravar 
-        o vídeo, ela deve ser excluída para evitar gastos.
-		
-	• Documentação (pode ficar no README/Miro/Imagem):
-		o Fluxo de comunicação dos microsserviços.  
-		o Desenho de arquitetura representando o fluxo de funcionamento.
-		
-	• Código-fonte
-	    o APIs conforme requisitos separados em microsserviços.
-		o Arquivo de Pipeline CI (testes) escrita (fase anterior).
-        o Para o deploy da lambda, é possível utilizar Serverless Framework, 
-          CLI da cloud escolhida, terraform ou cloudformation.
-		o README.md completo com instruções de uso e objetivos.
-		
-    Grupo 33
+Grupo 12
 
     • Participantes e usernames no Discord.
 	    RM367747 – Alexandre Araújo da Silva  / AlexandreAraujo
 		RM367560 – Josegil Dias Frota Figueira / gildiasfrota
 		RM367985 - Miguel de Oliveira Gonçalves / miguel084
 		
-	• Fluxo da arquitetura e comunicação dos microsserviços.
+	• Fluxo da arquitetura e comunicação dos microsserviços, Automação de CI/CD na ferramentas Azure DevOps.
 	    https://github.com/GilDias987/FCG.Users/blob/release/FCG%20-%20Arquitetura%20Azure%20(App%20Service).png
+		https://github.com/GilDias987/FCG/blob/main/FCG/teste/Captura%20de%20tela%202026-05-19%20221240.png
+		https://github.com/GilDias987/FCG/blob/main/FCG/teste/Captura%20de%20tela%202026-05-19%20221357.png
 		
     • Link do(s) repositório(s).
 		◦ UsersAPI
@@ -157,5 +171,4 @@ Funcionalidades Obrigatórias
 		https://github.com/GilDias987/FCG.Notification.Function
 
         ◦ Link do vídeo salvo no Youtube ou lugar de sua preferência. 
-		https://www.youtube.com/watch?v=7cORek177vw
-
+		https://www.youtube.com/watch?v=nPRzr2je_ro&t=13s
