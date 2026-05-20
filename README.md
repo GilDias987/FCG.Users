@@ -5,6 +5,7 @@ Responsável pela comunicação com o usuário através do envio de e-mails (sim
 ## 1. Funcionalidades
 * Envio de e-mail de boas-vindas para novos usuários.
 * Envio de confirmação de compra de jogos.
+* Na listagem de usuários e grupos, foi implementado o Redis para cache, visando a redução da latência no banco de dados.
 
 ## 2. Fluxo Orientado a Eventos
 Este serviço é um consumidor puramente reativo.
@@ -21,7 +22,7 @@ Este serviço é um consumidor puramente reativo.
 * **Orquestração:** Docker, Docker Compose, Kubernetes (K8s).
 * **Prometheus:** Observabilidade.
 * **Logs:** ILogger.
-* **MongoDB:** Utilizado para armazenar auditoria de dados que apresentam flexibilidade.
+* **MongoDB:** Utilizado para armazenar logs de auditoria de dados que apresentam flexibilidade.
 * **Redis:** Otimização com Cache para reduzir latência e carga nos bancos de dados.
 * **Elasticsearch:** Motor de busca e análise distribuído capaz de processar grandes volumes de dados em tempo quase real.
 * **Azure DevOps:** CI/CD.
