@@ -1,7 +1,7 @@
 Relatório de Entrega da Fase 3:
 
     ◦ Nome do grupo. 
-        Grupo 33
+        Grupo 12
           
     ◦ Participantes e usernames no Discord. 
 		RM367747 – Alexandre Araújo da Silva  / AlexandreAraujo
@@ -22,4 +22,4 @@ Relatório de Entrega da Fase 3:
 		https://github.com/GilDias987/FCG.Notification.Function
 
     ◦ Link do vídeo salvo no Youtube ou lugar de sua preferência.
-	    https://www.youtube.com/watch?v=7cORek177vw
+	    https://www.youtube.com/watch?v=nPRzr2je_ro&t=13s
