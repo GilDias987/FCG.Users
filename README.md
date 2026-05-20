@@ -14,16 +14,18 @@ Este serviço é um consumidor puramente reativo.
     * `PaymentProcessedEvent`: Se o status for `Approved`, dispara o e-mail de confirmação da compra com os detalhes do jogo.
 
 ## 3. Tecnologias
-* **Linguagem:** .NET 10
-* **Banco de Dados:** SQL Server e MongoDB
-* **Padrões:** MediatR, FluentValidation
-* **Documentação:** Swagger
-* **Orquestração:** Docker, Docker Compose, Kubernetes (K8s)
-* **CI/CD:** GitHub Actions
-* **Logs:** ILogger
+* **Linguagem:** .NET 10.
+* **Banco de Dados:** SQL Server e MongoDB.
+* **Padrões:** MediatR, FluentValidation.
+* **Documentação:** Swagger.
+* **Orquestração:** Docker, Docker Compose, Kubernetes (K8s).
+* **Prometheus:** Observabilidade.
+* **Logs:** ILogger.
 * **MongoDB:** Utilizado para armazenar auditoria de dados que apresentam flexibilidade.
 * **Redis:** Otimização com Cache para reduzir latência e carga nos bancos de dados.
 * **Elasticsearch:** Motor de busca e análise distribuído capaz de processar grandes volumes de dados em tempo quase real.
+* **Azure DevOps:** CI/CD.
+* **Terraform:** Desenvolvimento de Infrastructure as a Service IaaS.
 
 * **Azure:**
   * `Serviço de Aplicativo (App Service)`: Utilizado para hospedar as APIs principais (api-catalog, api-notifications, api-payments, api-users). São ambientes gerenciados para rodar aplicações web e APIs.
